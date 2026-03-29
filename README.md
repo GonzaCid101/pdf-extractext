@@ -1,1 +1,1 @@
-# PDFToText
+# pdf-extractext
