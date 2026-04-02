@@ -209,3 +209,6 @@ __marimo__/
 #Extensiones (sugerencias del profe)
 .vscode/
 *.-code-workspace
+
+#Para que no se suba la APIkey
+.env
