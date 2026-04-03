@@ -1,0 +1,1 @@
+This directory contains all unit and integration tests. It ensures the application's functionality and adherence to TDD principles.

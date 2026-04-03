@@ -1,0 +1,1 @@
+This directory contains the API controllers (FastAPI endpoints). It handles incoming HTTP requests and delegates to the service layer.

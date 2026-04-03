@@ -1,0 +1,1 @@
+This directory contains the data access layer. It handles interactions with the database (e.g., MongoDB) and abstracts data storage details.

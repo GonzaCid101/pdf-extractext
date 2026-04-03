@@ -1,0 +1,1 @@
+This directory contains data models and validation schemas (Pydantic). It defines the structure of data used throughout the application.

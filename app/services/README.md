@@ -1,0 +1,1 @@
+This directory contains the business logic. It orchestrates operations, processes data (e.g., PDFs), and interacts with external services (e.g., NVIDIA API).
