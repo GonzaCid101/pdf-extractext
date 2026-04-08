@@ -1,1 +1,3 @@
-This directory contains all unit and integration tests. It ensures the application's functionality and adherence to TDD principles.
+# Tests
+
+Esta carpeta contiene todos los tests unitarios e integrales del proyecto, siguiendo la metodología TDD para verificar el comportamiento de la aplicación.

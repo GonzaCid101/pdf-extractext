@@ -1,1 +1,3 @@
-This directory contains the API controllers (FastAPI endpoints). It handles incoming HTTP requests and delegates to the service layer.
+# Capa de Controladores (API)
+
+Esta carpeta contiene los endpoints de FastAPI que reciben las peticiones HTTP, delegan la lógica a los servicios y devuelven las respuestas al cliente.

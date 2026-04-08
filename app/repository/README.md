@@ -1,1 +1,3 @@
-This directory contains the data access layer. It handles interactions with the database (e.g., MongoDB) and abstracts data storage details.
+# Capa de Acceso a Datos
+
+Esta carpeta contiene la lógica para acceder a MongoDB, incluyendo consultas, inserciones, actualizaciones y operaciones de persistencia.

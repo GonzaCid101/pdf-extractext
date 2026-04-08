@@ -1,1 +1,3 @@
-This directory contains data models and validation schemas (Pydantic). It defines the structure of data used throughout the application.
+# Modelos de Datos
+
+Esta carpeta contiene los modelos Pydantic que definen la estructura de los datos, validaciones de entrada/salida y esquemas para la API.
