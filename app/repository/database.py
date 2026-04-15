@@ -1,8 +1,4 @@
-"""Database connection management module.
-
-Provides async MongoDB connectivity using Motor driver with
-connection lifecycle management.
-"""
+"""Gestión de conexiones asíncronas a MongoDB usando Motor."""
 
 import os
 from typing import Optional
@@ -11,29 +7,20 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 
 class MongoManager:
-    """Manages MongoDB async client connections.
-
-    Handles connection lifecycle and provides access to Motor client
-    for database operations. Reads MONGO_URI from environment.
-    """
+    """Gestiona conexiones asíncronas a MongoDB."""
 
     def __init__(self) -> None:
-        """Initialize MongoDB manager without creating client."""
         self._mongo_uri: str = os.environ.get("MONGO_URI", "")
         self._client: Optional[AsyncIOMotorClient] = None
 
     def get_client(self) -> AsyncIOMotorClient:
-        """Return the Motor async client instance (lazy initialization).
-
-        Returns:
-            AsyncIOMotorClient: Configured async MongoDB client.
-        """
+        """Retorna el cliente de MongoDB (inicialización lazy)."""
         if self._client is None:
             self._client = AsyncIOMotorClient(self._mongo_uri)
         return self._client
 
     async def close(self) -> None:
-        """Close the MongoDB connection gracefully."""
+        """Cierra la conexión a MongoDB."""
         if self._client is not None:
             self._client.close()
             self._client = None
@@ -43,9 +30,5 @@ _db_manager = MongoManager()
 
 
 async def get_database():
-    """Yield MongoDB client for FastAPI dependency injection.
-
-    Yields:
-        AsyncIOMotorClient: MongoDB client instance.
-    """
+    """Provee el cliente de MongoDB para inyección de dependencias de FastAPI."""
     yield _db_manager.get_client()

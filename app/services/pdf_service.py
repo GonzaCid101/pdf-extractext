@@ -1,0 +1,27 @@
+"""Servicio de extracción de texto de PDFs usando PyMuPDF."""
+
+import fitz
+
+
+def extract_text_from_pdf(pdf_content: bytes) -> str:
+    """Extrae texto plano del contenido de un PDF.
+
+    Args:
+        pdf_content: Contenido del archivo PDF en bytes.
+
+    Returns:
+        Texto extraído del PDF.
+
+    Raises:
+        ValueError: Si el contenido no es un PDF válido.
+    """
+    extracted_text = ""
+
+    try:
+        with fitz.open(stream=pdf_content, filetype="pdf") as pdf_document:
+            for page in pdf_document:
+                extracted_text += page.get_text()
+    except Exception as error:
+        raise ValueError(f"Contenido PDF inválido: {error}") from error
+
+    return extracted_text
