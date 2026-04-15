@@ -4,17 +4,7 @@ import fitz
 
 
 def extract_text_from_pdf(pdf_content: bytes) -> str:
-    """Extrae texto plano del contenido de un PDF.
-
-    Args:
-        pdf_content: Contenido del archivo PDF en bytes.
-
-    Returns:
-        Texto extraído del PDF.
-
-    Raises:
-        ValueError: Si el contenido no es un PDF válido.
-    """
+    """Extrae texto plano del contenido de un PDF."""
     extracted_text = ""
 
     try:
