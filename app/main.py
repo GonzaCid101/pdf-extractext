@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from app.api.health import router as health_router
 from app.api.endpoints.upload import router as upload_router
 
-app = FastAPI(title="Proyecto Cabras - API Conversor PDF")
+app = FastAPI(title="Proyecto Convertidor - API Conversor PDF")
 
 app.include_router(health_router)
 app.include_router(upload_router)
