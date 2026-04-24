@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.services.pdf_service import extract_text_from_pdf
+from app.services.checksum import generate_checksum
 
 client = TestClient(app)
 
@@ -18,6 +19,7 @@ def test_upload_valid_pdf_returns_success():
         pdf_bytes = pdf_file.read()
 
     expected_text = extract_text_from_pdf(pdf_bytes)
+    expected_checksum = generate_checksum(pdf_bytes)
     files = {"file": ("dummy.pdf", pdf_bytes, "application/pdf")}
 
     # Subir archivo
@@ -28,6 +30,7 @@ def test_upload_valid_pdf_returns_success():
     response_data = response.json()
     assert response_data["filename"] == "dummy.pdf"
     assert response_data["extracted_text"] == expected_text
+    assert response_data["checksum"] == expected_checksum
 
 
 def test_upload_txt_file_returns_415():
