@@ -1,3 +1,5 @@
+"""Endpoint de health check."""
+
 from fastapi import APIRouter
 
 router = APIRouter()
@@ -5,4 +7,5 @@ router = APIRouter()
 
 @router.get("/")
 def health_check():
-    return {"message": "API Conversor PDF funcionando"}
+    """Verifica estado de la API."""
+    return {"message": "PDF Extractext API funcionando"}

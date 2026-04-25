@@ -1,8 +1,8 @@
-"""Servicio para cálculo de checksums."""
+"""Servicio de cálculo de checksums."""
 
 import hashlib
 
 
 def generate_checksum(content: bytes) -> str:
-    """Genera un checksum SHA-256 del contenido dado."""
+    """Genera SHA-256 hash de bytes."""
     return hashlib.sha256(content).hexdigest()

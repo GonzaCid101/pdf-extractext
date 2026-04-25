@@ -1,7 +1,9 @@
+"""Entry point de la aplicación FastAPI."""
+
 from fastapi import FastAPI
 
-from app.api.health import router as health_router
 from app.api.endpoints.upload import router as upload_router
+from app.api.health import router as health_router
 
 app = FastAPI(title="Proyecto Convertidor - API Conversor PDF")
 

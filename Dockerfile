@@ -4,7 +4,7 @@ RUN pip install uv
 
 WORKDIR /app
 
-COPY pyproject.toml .
+COPY pyproject.toml README.md ./
 
 RUN uv pip install --system -e .
 

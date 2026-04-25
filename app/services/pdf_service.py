@@ -1,10 +1,10 @@
-"""Servicio de extracción de texto de PDFs usando PyMuPDF."""
+"""Servicio de extracción de texto de PDFs."""
 
 import fitz
 
 
 def extract_text_from_pdf(pdf_content: bytes) -> str:
-    """Extrae texto plano del contenido de un PDF."""
+    """Extrae texto plano de bytes de PDF."""
     extracted_text = ""
 
     try:

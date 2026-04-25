@@ -1,26 +1,36 @@
+"""Tests para conexión a base de datos."""
+
 import pytest
 
 from app.repository.database import MongoManager, get_database
 
 
-@pytest.mark.asyncio
-async def test_get_database_returns_client():
-    """Verifica que get_database() retorna un cliente válido."""
-    db_gen = get_database()
-    db = await anext(db_gen)
-    assert db is not None
-    assert hasattr(db, "admin")
-    await db_gen.aclose()
+class TestGetDatabase:
+    """Tests para get_database."""
+
+    @pytest.mark.asyncio
+    async def test_returns_valid_client(self):
+        """Retorna cliente válido."""
+        db_gen = get_database()
+        db = await anext(db_gen)
+
+        assert db is not None
+        assert hasattr(db, "admin")
+
+        await db_gen.aclose()
 
 
-@pytest.mark.asyncio
-async def test_mongo_connection_ping():
-    """Verifica que MongoDB responde al comando ping."""
-    mongo_manager = MongoManager()
-    client = mongo_manager.get_client()
+class TestMongoManager:
+    """Tests para MongoManager."""
 
-    result = await client.admin.command("ping")
+    @pytest.mark.asyncio
+    async def test_ping_returns_ok(self):
+        """Ping retorna ok."""
+        manager = MongoManager()
+        client = manager.get_client()
 
-    assert result == {"ok": 1.0}
+        result = await client.admin.command("ping")
 
-    await mongo_manager.close()
+        assert result == {"ok": 1.0}
+
+        await manager.close()

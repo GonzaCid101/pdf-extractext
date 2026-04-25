@@ -1,53 +1,38 @@
-from pathlib import Path
+"""Tests para endpoint de subida de PDF."""
 
-from fastapi.testclient import TestClient
-
-from app.main import app
-from app.services.pdf_service import extract_text_from_pdf
 from app.services.checksum import generate_checksum
-
-client = TestClient(app)
-
-FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
-DUMMY_PDF_PATH = FIXTURES_DIR / "dummy.pdf"
+from app.services.pdf_service import extract_text_from_pdf
 
 
-def test_upload_valid_pdf_returns_success():
-    """Verifica que al subir un PDF válido retorna éxito con el texto extraído."""
-    # Cargar PDF de prueba
-    with open(DUMMY_PDF_PATH, "rb") as pdf_file:
-        pdf_bytes = pdf_file.read()
+class TestUploadPDF:
+    """Tests para POST /upload-pdf."""
 
-    expected_text = extract_text_from_pdf(pdf_bytes)
-    expected_checksum = generate_checksum(pdf_bytes)
-    files = {"file": ("dummy.pdf", pdf_bytes, "application/pdf")}
+    def test_valid_pdf_returns_200_with_data(self, test_client, pdf_bytes):
+        """PDF válido retorna 200 con datos extraídos."""
+        expected_text = extract_text_from_pdf(pdf_bytes)
+        expected_checksum = generate_checksum(pdf_bytes)
+        files = {"file": ("dummy.pdf", pdf_bytes, "application/pdf")}
 
-    # Subir archivo
-    response = client.post("/upload-pdf", files=files)
+        response = test_client.post("/upload-pdf", files=files)
 
-    # Verificar respuesta exitosa
-    assert response.status_code == 200
-    response_data = response.json()
-    assert response_data["filename"] == "dummy.pdf"
-    assert response_data["extracted_text"] == expected_text
-    assert response_data["checksum"] == expected_checksum
+        assert response.status_code == 200
+        data = response.json()
+        assert data["filename"] == "dummy.pdf"
+        assert data["extracted_text"] == expected_text
+        assert data["checksum"] == expected_checksum
 
+    def test_txt_file_returns_415(self, test_client):
+        """Archivo no-PDF retorna 415."""
+        files = {"file": ("test.txt", b"texto", "text/plain")}
 
-def test_upload_txt_file_returns_415():
-    """Verifica que al subir un archivo que no es PDF retorna error 415."""
-    txt_content = b"Contenido de texto"
-    files = {"file": ("test.txt", txt_content, "text/plain")}
+        response = test_client.post("/upload-pdf", files=files)
 
-    response = client.post("/upload-pdf", files=files)
+        assert response.status_code == 415
 
-    assert response.status_code == 415
+    def test_empty_pdf_returns_400(self, test_client):
+        """PDF vacío retorna 400."""
+        files = {"file": ("empty.pdf", b"", "application/pdf")}
 
+        response = test_client.post("/upload-pdf", files=files)
 
-def test_upload_empty_pdf_returns_400():
-    """Verifica que al subir un PDF vacío retorna error 400."""
-    empty_content = b""
-    files = {"file": ("empty.pdf", empty_content, "application/pdf")}
-
-    response = client.post("/upload-pdf", files=files)
-
-    assert response.status_code == 400
+        assert response.status_code == 400

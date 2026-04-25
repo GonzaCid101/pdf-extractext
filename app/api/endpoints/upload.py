@@ -1,17 +1,17 @@
-"""Endpoint para carga y validación de archivos PDF."""
+"""Endpoint para subida de archivos PDF."""
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.models.pdf_models import PDFDocumentResponse
-from app.services.pdf_service import extract_text_from_pdf
 from app.services.checksum import generate_checksum
+from app.services.pdf_service import extract_text_from_pdf
 
 router = APIRouter()
 
 
 @router.post("/upload-pdf", response_model=PDFDocumentResponse)
 async def upload_pdf(file: UploadFile = File(...)) -> PDFDocumentResponse:
-    """Carga un PDF, valida la extensión y extrae su texto."""
+    """Procesa PDF y retorna texto extraído con checksum."""
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=415, detail="Solo se permiten archivos PDF")
 
@@ -24,5 +24,7 @@ async def upload_pdf(file: UploadFile = File(...)) -> PDFDocumentResponse:
     checksum = generate_checksum(pdf_bytes)
 
     return PDFDocumentResponse(
-        filename=file.filename, extracted_text=extracted_text, checksum=checksum
+        filename=file.filename,
+        extracted_text=extracted_text,
+        checksum=checksum,
     )

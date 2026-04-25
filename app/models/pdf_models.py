@@ -1,10 +1,10 @@
-"""Modelos de datos para documentos PDF."""
+"""Modelos Pydantic para documentos PDF."""
 
 from pydantic import BaseModel
 
 
 class PDFDocumentResponse(BaseModel):
-    """Modelo de respuesta para un documento PDF procesado."""
+    """Respuesta de documento PDF procesado."""
 
     filename: str
     extracted_text: str

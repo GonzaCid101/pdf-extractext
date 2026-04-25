@@ -1,20 +1,26 @@
-from pathlib import Path
+"""Tests para servicio de extracción de PDF."""
 
 from app.services.pdf_service import extract_text_from_pdf
 
 
-def test_extract_text_from_pdf_returns_expected_content():
-    """Verifica que se extrae correctamente el texto de un PDF."""
-    # Cargar PDF de prueba
-    pdf_path = Path(__file__).parent.parent / "fixtures" / "dummy.pdf"
-    pdf_bytes = pdf_path.read_bytes()
+class TestExtractTextFromPDF:
+    """Tests para extract_text_from_pdf."""
 
-    # Extraer texto
-    extracted_text = extract_text_from_pdf(pdf_bytes)
+    def test_returns_string(self, pdf_bytes):
+        """Retorna string."""
+        result = extract_text_from_pdf(pdf_bytes)
 
-    # Verificar contenido esperado
-    assert isinstance(extracted_text, str)
-    assert len(extracted_text) > 0
-    assert "ARCHIVO DE PRUEBA" in extracted_text
-    assert "PDF-EXTRACTEXT" in extracted_text
-    assert "EXTRACCION EXISTOSA" in extracted_text
+        assert isinstance(result, str)
+
+    def test_returns_non_empty_text(self, pdf_bytes):
+        """Retorna texto no vacío."""
+        result = extract_text_from_pdf(pdf_bytes)
+
+        assert len(result) > 0
+
+    def test_contains_expected_content(self, pdf_bytes, pdf_text_content):
+        """Contiene contenido esperado."""
+        result = extract_text_from_pdf(pdf_bytes)
+
+        for expected in pdf_text_content:
+            assert expected in result

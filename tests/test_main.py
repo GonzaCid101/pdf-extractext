@@ -1,13 +1,12 @@
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
+"""Tests para aplicación principal."""
 
 
-def test_healthcheck():
-    """Verifica que el endpoint de health check responde correctamente."""
-    response = client.get("/")
+class TestHealthCheck:
+    """Tests para endpoint de health check."""
 
-    assert response.status_code == 200
-    assert response.json() == {"message": "API Conversor PDF funcionando"}
+    def test_returns_200_with_message(self, test_client):
+        """Retorna 200 con mensaje."""
+        response = test_client.get("/")
+
+        assert response.status_code == 200
+        assert response.json() == {"message": "PDF Extractext API funcionando"}

@@ -7,26 +7,31 @@ from app.models.pdf_models import PDFDocumentResponse
 
 
 class TestPDFDocumentResponse:
-    """Tests para el modelo de respuesta de documento PDF."""
+    """Tests para PDFDocumentResponse."""
 
-    def test_modelo_requiere_filename(self):
+    def test_requires_filename(self):
+        """Requiere filename."""
         with pytest.raises(ValidationError):
-            PDFDocumentResponse(extracted_text="contenido", checksum="abc123")
+            PDFDocumentResponse(extracted_text="texto", checksum="abc")
 
-    def test_modelo_requiere_extracted_text(self):
+    def test_requires_extracted_text(self):
+        """Requiere extracted_text."""
         with pytest.raises(ValidationError):
-            PDFDocumentResponse(filename="doc.pdf", checksum="abc123")
+            PDFDocumentResponse(filename="doc.pdf", checksum="abc")
 
-    def test_modelo_requiere_checksum(self):
+    def test_requires_checksum(self):
+        """Requiere checksum."""
         with pytest.raises(ValidationError):
-            PDFDocumentResponse(filename="doc.pdf", extracted_text="contenido")
+            PDFDocumentResponse(filename="doc.pdf", extracted_text="texto")
 
-    def test_modelo_acepta_datos_validos(self):
+    def test_accepts_valid_data(self):
+        """Acepta datos válidos."""
         doc = PDFDocumentResponse(
-            filename="documento.pdf",
-            extracted_text="Este es el contenido extraído",
-            checksum="a1b2c3d4e5f6",
+            filename="doc.pdf",
+            extracted_text="contenido",
+            checksum="a1b2",
         )
-        assert doc.filename == "documento.pdf"
-        assert doc.extracted_text == "Este es el contenido extraído"
-        assert doc.checksum == "a1b2c3d4e5f6"
+
+        assert doc.filename == "doc.pdf"
+        assert doc.extracted_text == "contenido"
+        assert doc.checksum == "a1b2"
