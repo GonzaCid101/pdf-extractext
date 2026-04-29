@@ -4,10 +4,8 @@ from bson import ObjectId
 
 
 class TestGetPDFs:
-    """Tests para GET /pdfs y GET /pdfs/{id}."""
 
     async def test_get_all_pdfs(self, async_client, pdf_collection):
-        """Retorna todos los documentos PDF guardados."""
         pdf_document = {
             "filename": "test_document.pdf",
             "extracted_text": "Este es el texto extraído del PDF",
@@ -26,7 +24,6 @@ class TestGetPDFs:
         assert data[0]["filename"] == "test_document.pdf"
 
     async def test_get_pdf_by_id(self, async_client, pdf_collection):
-        """Retorna un documento PDF específico por su ID."""
         specific_id = ObjectId("65797e91c185b4c7c5a93a1b")
         pdf_document = {
             "_id": specific_id,
@@ -44,7 +41,6 @@ class TestGetPDFs:
         assert data["filename"] == "specific_document.pdf"
 
     async def test_get_pdf_not_found(self, async_client, pdf_collection):
-        """Retorna 404 si el ID no existe."""
         non_existent_id = "65797e91c185b4c7c5a93a99"
 
         response = await async_client.get(f"/pdfs/{non_existent_id}")
@@ -59,10 +55,6 @@ class TestPatchPDF:
     async def test_patch_pdf_updates_filename_successfully(
         self, async_client, pdf_collection
     ):
-        """GIVEN un PDF existente
-        WHEN se actualiza el filename via PATCH
-        THEN retorna 200 con el documento actualizado y filename nuevo.
-        """
         # Given: Insertar PDF de prueba
         pdf_document = {
             "filename": "original.pdf",
@@ -84,10 +76,6 @@ class TestPatchPDF:
         assert data["checksum"] == "abc123checksum"
 
     async def test_patch_pdf_not_found_returns_404(self, async_client, pdf_collection):
-        """GIVEN un ID inexistente
-        WHEN se intenta actualizar via PATCH
-        THEN retorna 404 Not Found.
-        """
         # Given
         non_existent_id = "65797e91c185b4c7c5a93a99"
 
@@ -103,15 +91,10 @@ class TestPatchPDF:
 
 
 class TestDeletePDF:
-    """Tests para DELETE /pdfs/{id} - Eliminación de documentos."""
 
     async def test_delete_pdf_removes_document_successfully(
         self, async_client, pdf_collection
     ):
-        """GIVEN un PDF existente
-        WHEN se elimina via DELETE
-        THEN retorna 204 y el documento ya no existe.
-        """
         # Given: Insertar PDF de prueba
         pdf_document = {
             "filename": "to_delete.pdf",
@@ -132,10 +115,6 @@ class TestDeletePDF:
         assert get_response.status_code == 404
 
     async def test_delete_pdf_not_found_returns_404(self, async_client, pdf_collection):
-        """GIVEN un ID inexistente
-        WHEN se intenta eliminar via DELETE
-        THEN retorna 404 Not Found.
-        """
         # Given
         non_existent_id = "65797e91c185b4c7c5a93a99"
 

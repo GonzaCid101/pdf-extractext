@@ -16,14 +16,12 @@ router = APIRouter()
 
 
 def _serialize_document(doc: dict) -> dict:
-    """Convierte ObjectId a string en el documento."""
     doc["_id"] = str(doc["_id"])
     return doc
 
 
 @router.get("/pdfs")
 async def get_all_pdfs(db: AsyncIOMotorClient = Depends(get_database)):
-    """Retorna todos los documentos PDF guardados."""
     documents = []
     async for doc in db.pdf_db.pdfs.find():
         documents.append(_serialize_document(doc))
@@ -32,7 +30,6 @@ async def get_all_pdfs(db: AsyncIOMotorClient = Depends(get_database)):
 
 @router.get("/pdfs/{pdf_id}")
 async def get_pdf_by_id(pdf_id: str, db: AsyncIOMotorClient = Depends(get_database)):
-    """Retorna un documento PDF específico por su ID."""
     document = await find_by_id(db, pdf_id)
     if document is None:
         raise HTTPException(status_code=404, detail="PDF no encontrado")
@@ -45,22 +42,8 @@ async def patch_pdf(
     update_data: PDFUpdateRequest,
     db: AsyncIOMotorClient = Depends(get_database),
 ):
-    """Actualiza metadatos de un documento PDF existente.
+    """Actualiza metadatos de un documento PDF existente."""
 
-    Solo permite modificar el filename. Los campos checksum y extracted_text
-    son inmutables para garantizar la integridad del documento.
-
-    Args:
-        pdf_id: ID del documento PDF.
-        update_data: Datos a actualizar (solo filename).
-        db: Cliente de base de datos.
-
-    Returns:
-        Documento PDF actualizado.
-
-    Raises:
-        HTTPException: 404 si el PDF no existe.
-    """
     # Verificar que el documento existe
     existing = await find_by_id(db, pdf_id)
     if existing is None:
@@ -82,18 +65,7 @@ async def delete_pdf_endpoint(
     pdf_id: str,
     db: AsyncIOMotorClient = Depends(get_database),
 ):
-    """Elimina físicamente un documento PDF de la base de datos.
-
-    Args:
-        pdf_id: ID del documento PDF a eliminar.
-        db: Cliente de base de datos.
-
-    Returns:
-        None (HTTP 204 No Content).
-
-    Raises:
-        HTTPException: 404 si el PDF no existe.
-    """
+    """Elimina físicamente un documento PDF de la base de datos."""
     # Verificar que el documento existe antes de eliminar
     existing = await find_by_id(db, pdf_id)
     if existing is None:

@@ -7,7 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 
 class MongoManager:
-    """Gestor de conexiones MongoDB con lazy initialization."""
+    """Gestor de conexiones MongoDB."""
 
     def __init__(self) -> None:
         self._mongo_uri: str = os.environ.get("MONGO_URI", "")
@@ -29,7 +29,6 @@ _db_manager = MongoManager()
 
 async def get_database() -> AsyncGenerator[AsyncIOMotorClient, None]:
     """Provee cliente MongoDB fresh para cada request.
-
     Crea un nuevo cliente en cada llamada para evitar problemas
     de event loop compartido entre tests.
     """
