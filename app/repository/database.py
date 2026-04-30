@@ -1,16 +1,17 @@
 """Conexión asíncrona a MongoDB."""
 
-import os
 from typing import AsyncGenerator, Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient
+
+from app.core.config import settings
 
 
 class MongoManager:
     """Gestor de conexiones MongoDB."""
 
     def __init__(self) -> None:
-        self._mongo_uri: str = os.environ.get("MONGO_URI", "")
+        self._mongo_uri: str = settings.MONGO_URI
         self._client: Optional[AsyncIOMotorClient] = None
 
     def get_client(self) -> AsyncIOMotorClient:
@@ -32,7 +33,7 @@ async def get_database() -> AsyncGenerator[AsyncIOMotorClient, None]:
     Crea un nuevo cliente en cada llamada para evitar problemas
     de event loop compartido entre tests.
     """
-    mongo_uri = os.environ.get("MONGO_URI", "")
+    mongo_uri = settings.MONGO_URI
     client = AsyncIOMotorClient(mongo_uri)
     try:
         yield client

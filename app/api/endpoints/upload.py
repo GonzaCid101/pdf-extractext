@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from app.core.config import settings
 from app.models.pdf_models import PDFDocumentResponse
 from app.repository.database import get_database
 from app.services.pdf_service import DuplicatePDFError, process_and_save_pdf
@@ -20,7 +21,9 @@ async def upload_pdf(
     db: AsyncIOMotorClient = Depends(get_database),
 ) -> PDFDocumentResponse:
     """Procesa PDF, guarda en BD y retorna datos con ID."""
-    if not file.filename or not file.filename.lower().endswith(".pdf"):
+    if not file.filename or not file.filename.lower().endswith(
+        settings.ALLOWED_FILE_EXTENSION
+    ):
         raise HTTPException(status_code=415, detail="Solo se permiten archivos PDF")
 
     pdf_bytes = await file.read()
