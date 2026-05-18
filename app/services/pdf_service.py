@@ -3,46 +3,48 @@
 import fitz
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from app.repository.pdf_repository import find_by_checksum, save_pdf
-from app.services.checksum import generate_checksum
+from app.repository.pdf_repository import PDFRepository
+from app.services.checksum import ChecksumService
 
 
 class DuplicatePDFError(Exception):
-    """PDF duplicado detectado por checksum."""
-
     pass
 
 
-async def process_and_save_pdf(
-    db: AsyncIOMotorClient, filename: str, pdf_content: bytes
-) -> dict:
-    """Procesa PDF y lo guarda en BD. Lanza DuplicatePDFError si existe."""
-    extracted_text = extract_text_from_pdf(pdf_content)
-    checksum = generate_checksum(pdf_content)
+class PDFService:
+    def __init__(
+        self,
+        repository: PDFRepository,
+        checksum_service: ChecksumService | None = None,
+    ) -> None:
+        self._repository = repository
+        self._checksum_service = checksum_service or ChecksumService()
 
-    if await find_by_checksum(db, checksum) is not None:
-        raise DuplicatePDFError("El documento ya existe en el sistema")
+    def extract_text(self, pdf_content: bytes) -> str:
+        extracted_text = ""
 
-    document = {
-        "filename": filename,
-        "extracted_text": extracted_text,
-        "checksum": checksum,
-    }
+        try:
+            with fitz.open(stream=pdf_content, filetype="pdf") as pdf_document:
+                for page in pdf_document:
+                    extracted_text += page.get_text()
+        except Exception as error:
+            raise ValueError(f"Contenido PDF inválido: {error}") from error
 
-    document["_id"] = await save_pdf(db, document)
+        return extracted_text
 
-    return document
+    async def process_and_save(self, filename: str, pdf_content: bytes) -> dict:
+        extracted_text = self.extract_text(pdf_content)
+        checksum = self._checksum_service.generate(pdf_content)
 
+        if await self._repository.find_by_checksum(checksum) is not None:
+            raise DuplicatePDFError("El documento ya existe en el sistema")
 
-def extract_text_from_pdf(pdf_content: bytes) -> str:
-    """Extrae texto plano de bytes de PDF."""
-    extracted_text = ""
+        document = {
+            "filename": filename,
+            "extracted_text": extracted_text,
+            "checksum": checksum,
+        }
 
-    try:
-        with fitz.open(stream=pdf_content, filetype="pdf") as pdf_document:
-            for page in pdf_document:
-                extracted_text += page.get_text()
-    except Exception as error:
-        raise ValueError(f"Contenido PDF inválido: {error}") from error
+        document["_id"] = await self._repository.save(document)
 
-    return extracted_text
+        return document

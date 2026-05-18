@@ -3,6 +3,6 @@
 import hashlib
 
 
-def generate_checksum(content: bytes) -> str:
-    """Genera SHA-256 hash de bytes."""
-    return hashlib.sha256(content).hexdigest()
+class ChecksumService:
+    def generate(self, content: bytes) -> str:
+        return hashlib.sha256(content).hexdigest()
