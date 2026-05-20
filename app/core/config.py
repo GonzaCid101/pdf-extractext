@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
 
-    # Upload Limits
+    # Limites
     MAX_FILE_SIZE_MB: int = 50
     ALLOWED_FILE_EXTENSION: str = ".pdf"
 

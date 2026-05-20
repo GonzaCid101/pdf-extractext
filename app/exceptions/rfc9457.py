@@ -6,7 +6,6 @@ from fastapi import status
 
 
 class RFC9457Exception(Exception):
-    """Excepción base siguiendo el estándar RFC 9457."""
 
     def __init__(
         self,
@@ -38,7 +37,6 @@ class RFC9457Exception(Exception):
 
 
 class DuplicatePDFException(RFC9457Exception):
-    """Excepción para PDF duplicado detectado por checksum."""
 
     def __init__(self, detail: str = "El documento ya existe en el sistema") -> None:
         super().__init__(

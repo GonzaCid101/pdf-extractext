@@ -29,10 +29,6 @@ _db_manager = MongoManager()
 
 
 async def get_database() -> AsyncGenerator[AsyncIOMotorClient, None]:
-    """Provee cliente MongoDB fresh para cada request.
-    Crea un nuevo cliente en cada llamada para evitar problemas
-    de event loop compartido entre tests.
-    """
     mongo_uri = settings.MONGO_URI
     client = AsyncIOMotorClient(mongo_uri)
     try:

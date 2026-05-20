@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field, ConfigDict
 
 
 class PDFDocumentResponse(BaseModel):
-    """Respuesta de documento PDF procesado."""
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -17,8 +16,7 @@ class PDFDocumentResponse(BaseModel):
 
 
 class PDFUpdateRequest(BaseModel):
-    """Solicitud de actualización de metadatos PDF.
-
+    """
     Solo permite actualizar el filename. Los campos checksum y extracted_text
     son inmutables para mantener la integridad del documento.
     """
