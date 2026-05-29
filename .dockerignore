@@ -1,0 +1,70 @@
+# Compilacion
+build/
+dist/
+*.egg-info/
+
+# Entornos Virtuales
+.venv/
+venv/
+env/
+
+# Git
+.git/
+.gitignore
+
+# Configuracion y Variables de Entorno Locales
+.env
+.env.example
+*.env.local
+*.env.*.local
+
+# Cache de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.hypothesis/
+.ruff_cache/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.sw[a-p]
+*~
+
+# Sistemas Operativos
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker y CI/CD
+Dockerfile
+docker-compose.yml
+.dockerignore
+.github/
+
+# Test y Documentacion de proyecto
+tests/
+docs/
+.pytest_cache/
+
+# Archivos de log y db locales
+*.log
+*.db
+*.sqlite3
+*.dump
+
+# Archivos innecesarios para la imagen final
+.opencode/
+.python-version
+uv.lock
+docker-image-name

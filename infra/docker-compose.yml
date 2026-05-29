@@ -1,0 +1,43 @@
+
+
+services:
+  app:
+    container_name: pdf-extractext-api
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile
+    ports:
+      - "${APP_PORT:-8000}:${APP_PORT:-8000}"
+    env_file:
+      - ../.env
+    environment:
+      - PORT=${APP_PORT:-8000}
+      - WORKERS=${UVICORN_WORKERS:-4}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - pdfnet
+
+  db:
+    container_name: pdf-extractext-db
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - pdfnet
+    healthcheck:
+      test: ["CMD-SHELL", "mongo --eval 'db.adminCommand({ ping: 1 }).ok' --quiet || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mongodata:
+
+networks:
+  pdfnet:
+    driver: bridge
