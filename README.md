@@ -43,10 +43,10 @@ cd pdf-extractext
 cp .env.example .env
 
 # 3. Levantar los servicios (app + MongoDB)
-docker compose up --build -d
+docker compose -f infra/docker-compose.yml up --build -d
 
 # 4. Verificar que los servicios están corriendo
-docker compose ps
+docker compose -f infra/docker-compose.yml ps
 ```
 
 La API estará disponible en:

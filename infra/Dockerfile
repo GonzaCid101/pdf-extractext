@@ -28,6 +28,10 @@ RUN chown -R appuser:appgroup /app
 # Cambiar al usuario no privilegiado
 USER appuser
 
+# Valores por defecto por si alguien corre la imagen sin docker-compose
+ENV PORT=8000
+ENV WORKERS=1
+
 # Exponer el puerto (Uvicorn lee de $PORT)
 EXPOSE ${PORT}
 
