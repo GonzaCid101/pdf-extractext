@@ -43,25 +43,20 @@ cd pdf-extractext
 cp .env.example .env
 
 # 3. Levantar los servicios (app + MongoDB)
-docker compose -f infra/docker-compose.yml up --build -d
+make up
 
-# 4. Verificar que los servicios están corriendo
-docker compose -f infra/docker-compose.yml ps
-```
+# 4. Correr los tests de forma aislada
+make test
 
 La API estará disponible en:
 - **API:** http://localhost:8000
 - **Documentación interactiva:** http://localhost:8000/docs
 
-### Detener los servicios
-
-```bash
 # Detener contenedores
-docker compose down
+make down
 
-# Detener y eliminar volúmenes de datos
-docker compose down -v
-```
+# Reconstruir la imagen (ej. al agregar nuevas dependencias)
+make build
 
 ## Variables de Entorno
 
