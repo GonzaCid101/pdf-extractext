@@ -1,0 +1,19 @@
+services:
+  db:
+      container_name: pdf-extractext-db
+      image: mongo:4.4
+      volumes:
+        - ./mongodata:/data/db
+      networks:
+        - pdfnet
+      healthcheck:
+        test: ["CMD-SHELL", "mongo --eval 'db.adminCommand({ ping: 1 }).ok' --quiet || exit 1"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 30s
+
+networks:
+  pdfnet:
+    name: red_compartida_pdf
+    driver: bridge

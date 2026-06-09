@@ -23,7 +23,7 @@ API REST para extraer texto de archivos PDF y almacenarlos en MongoDB. Permite s
 
 ## Tecnologias
 
-Python 3.12+ | FastAPI | Pydantic | PyMuPDF | Motor | MongoDB | Docker | Pytest
+Python 3.14.0 | FastAPI | Pydantic | PyMuPDF | Motor | MongoDB | Docker | Pytest
 
 ## Requisitos
 
@@ -42,22 +42,28 @@ cd pdf-extractext
 # 2. Configurar variables de entorno
 cp .env.example .env
 
-# 3. Levantar los servicios (app + MongoDB)
+# 3. Construir la imagen de la API
+make build
+
+# 4. Levantar la infraestructura (Base de Datos + API)
 make up
 
-# 4. Correr los tests de forma aislada
+# 5. Correr los tests de forma aislada
 make test
 
 La API estará disponible en:
 - **API:** http://localhost:8000
 - **Documentación interactiva:** http://localhost:8000/docs
+    #Acceso directo
+    make docs
+
+#Encender o apagar solo la base de datos
+make db-up / make db-down 
 
 # Detener contenedores
 make down
 
-# Reconstruir la imagen (ej. al agregar nuevas dependencias)
-make build
-
+```
 ## Variables de Entorno
 
 Configuración centralizada en `app/core/config.py` usando **pydantic-settings**.
@@ -85,58 +91,58 @@ Configuración centralizada en `app/core/config.py` usando **pydantic-settings**
 | `PATCH` | `/pdfs/{id}` | Actualizar metadatos (filename) |
 | `DELETE` | `/pdfs/{id}` | Eliminar un PDF de la base de datos |
 
-```
-
-## Testing
-
-```bash
-# Ejecutar todos los tests
-docker compose exec app pytest tests/ -v
-
-# Tests específicos por módulo
-docker compose exec app pytest tests/services/ -v
-docker compose exec app pytest tests/api/ -v
-docker compose exec app pytest tests/models/ -v
-```
 
 ## Arquitectura
 
 El proyecto sigue una arquitectura limpia con separación de responsabilidades:
 
 ```
-app/
-├── main.py                  # Punto de entrada de la aplicación
-├── core/
-│   └── config.py              # Configuración centralizada
-├── api/
-│   ├── health.py              # Router de health check
-│   ├── dependencies.py        # Dependencias inyectables
-│   └── endpoints/
-│       ├── upload.py          # Endpoint de subida de PDFs
-│       └── pdfs.py            # Endpoints CRUD de PDFs
-├── models/
-│   └── pdf_models.py          # Esquemas Pydantic
-├── services/
-│   ├── checksum.py            # Cálculo de checksums SHA-256
-│   └── pdf_service.py         # Lógica de extracción de texto
-├── repository/
-│   ├── database.py            # Conexión a MongoDB
-│   └── pdf_repository.py      # Operaciones CRUD
-└── exceptions/
-    └── rfc9457.py             # Manejo de errores estandarizado
-
-tests/
-├── api/                       # Tests de endpoints
-├── core/                      # Tests de configuración
-├── models/                    # Tests de esquemas Pydantic
-├── repository/                # Tests de conexión y CRUD
-├── services/                  # Tests de lógica de negocio
-└── exceptions/                # Tests de manejo de errores
+pdf-extractext
+├── app/                     
+│   ├── main.py                  # Punto de entrada de la aplicación
+│   ├── core/
+│   │   └── config.py              # Configuración centralizada
+│   ├── api/
+│   │   ├── health.py              # Router de health check
+│   │   ├── dependencies.py        # Dependencias inyectables
+│   │   └── endpoints/
+│   │       ├── upload.py          # Endpoint de subida de PDFs
+│   │       └── pdfs.py            # Endpoints CRUD de PDFs
+│   ├── models/
+│   │   └── pdf_models.py          # Esquemas Pydantic
+│   ├── services/
+│   │   ├── checksum.py            # Cálculo de checksums SHA-256
+│   │   └── pdf_service.py         # Lógica de extracción de texto
+│   ├── repository/
+│   │   ├── database.py            # Conexión a MongoDB
+│   │   └── pdf_repository.py      # Operaciones CRUD
+│   └── exceptions/
+│       └── rfc9457.py             # Manejo de errores estandarizado
+├── infra/                   
+│   ├── docker-compose.db.yml   # Contenedor aislado de MongoDB
+│   ├── docker-compose.test.yml # Override temporal para testing
+│   ├── docker-compose.yml      # Contenedor principal de la API
+│   └── Dockerfile              # Multi-stage build de la aplicación
+├── tests/                
+│   ├── api/                    # Tests de endpoints
+│   ├── core/                   # Tests de configuración
+│   ├── exceptions/             # Tests de manejo de errores    
+│   ├── models/                 # Tests de esquemas Pydantic
+│   ├── repository/             # Tests de conexión y CRUD
+│   ├── services/               # Tests de lógica de negocio
+│   └── fixtures/               # Archivos PDF de prueba estáticos
+│
+│   
+├── .env.example             # Plantilla de variables de entorno
+├── Makefile                 # Atajos para comandos de terminal
+├── pyproject.toml           # Declaración de dependencias
+└── uv.lock                  # Lockfile estricto de dependencias
 ```
 
 ## Metodologías Aplicadas
 
 - **Test Driven Development (TDD)**
-- **12-Factor App** (Configuración en variables de entorno)
+- **12-Factor App**
 - **Clean Code** y **Clean Architecture**
 - **Principios SOLID**, **KISS**, **DRY**, **YAGNI**
+

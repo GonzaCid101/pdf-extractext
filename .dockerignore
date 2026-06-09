@@ -66,5 +66,4 @@ docs/
 # Archivos innecesarios para la imagen final
 .opencode/
 .python-version
-uv.lock
 docker-image-name

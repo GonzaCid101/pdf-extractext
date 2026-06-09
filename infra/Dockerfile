@@ -1,39 +1,50 @@
-FROM python:3.12-slim
+# -- Etapa Builder --
+FROM python:3.14.0-slim AS builder
 
-# Varibles de entorno para el build
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN pip install uv
+
+# Archivos de configuracion y lock
+COPY pyproject.toml uv.lock README.md ./
+
+# Generar entorno virtual siguiendo lock
+RUN uv sync --frozen
+
+COPY app/ ./app/
+
+# -- Etapa Runner --
+FROM python:3.14.0-slim AS runner
+
+# Paquete de zonas horarias
+ENV TZ="America/Argentina/Mendoza"
+RUN apt-get update && apt-get install -y tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && rm -rf /var/lib/apt/lists/*
 
 # Crear grupo y usuario sin privilegios
 RUN groupadd -r appgroup && useradd -m -r -g appgroup appuser
 
-# Instalar uv
-RUN pip install uv
-
-# Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar solo los archivos necesarios para instalar dependencias
-COPY pyproject.toml README.md ./
+# Obtener dependencias y codigo del builder
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/app /app/app
 
-# Instalar dependencias en el sistema
-RUN uv pip install --system -e .
-
-# Copiar el codigo de la aplicacion
-COPY app/ ./app/
-
-# Asignar permisos al usuario sin privilegios
+# Asignar permisos
 RUN chown -R appuser:appgroup /app
 
-# Cambiar al usuario no privilegiado
 USER appuser
 
-# Valores por defecto por si alguien corre la imagen sin docker-compose
-ENV PORT=8000
-ENV WORKERS=1
+# Exponer el puerto
+EXPOSE 8000
 
-# Exponer el puerto (Uvicorn lee de $PORT)
-EXPOSE ${PORT}
+ENV PATH="/app/.venv/bin:$PATH"
+# Ejecutar Uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
 
-# Ejecutar Uvicorn con workers parametrizados
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --workers ${WORKERS}
+

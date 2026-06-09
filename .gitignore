@@ -210,5 +210,8 @@ __marimo__/
 .vscode/
 *.-code-workspace
 
-#Para que no se suba la APIkey
+#Variables de entorno, claves, etc.
 .env
+
+# Base de datos
+infra/mongodata/
