@@ -1,4 +1,7 @@
 services:
   app:
+    environment:
+      - PYTHONPATH=/app
     volumes:
       - ../tests:/app/tests
+      - ../pyproject.toml:/app/pyproject.toml
