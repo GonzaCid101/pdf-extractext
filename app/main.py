@@ -7,9 +7,14 @@ from app.api.endpoints.pdfs import router as pdfs_router
 from app.api.endpoints.upload import router as upload_router
 from app.api.health import router as health_router
 from app.core.config import settings
+from app.core.logger import setup_logging
+from app.core.middleware import TracingMiddleware
 from app.exceptions.rfc9457 import RFC9457Exception
 
+setup_logging()
+
 app = FastAPI(title=settings.APP_TITLE)
+app.add_middleware(TracingMiddleware)
 
 
 @app.exception_handler(RFC9457Exception)
