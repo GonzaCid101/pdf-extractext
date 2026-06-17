@@ -1,11 +1,9 @@
 """Endpoints para consultar documentos PDF guardados."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.api.dependencies import get_pdf_repository
 from app.models.pdf_models import PDFUpdateRequest
-from app.repository.database import get_database
 from app.repository.pdf_repository import PDFRepository
 
 router = APIRouter()
@@ -18,18 +16,15 @@ def _serialize_document(doc: dict) -> dict:
 
 @router.get("/pdfs")
 async def get_all_pdfs(
-    db: AsyncIOMotorClient = Depends(get_database),
+    repository: PDFRepository = Depends(get_pdf_repository),
 ):
-    documents = []
-    async for doc in db.pdf_db.pdfs.find():
-        documents.append(_serialize_document(doc))
-    return documents
+    documents = await repository.get_all()
+    return [_serialize_document(doc) for doc in documents]
 
 
 @router.get("/pdfs/{pdf_id}")
 async def get_pdf_by_id(
     pdf_id: str,
-    db: AsyncIOMotorClient = Depends(get_database),
     repository: PDFRepository = Depends(get_pdf_repository),
 ):
     document = await repository.find_by_id(pdf_id)
@@ -42,7 +37,6 @@ async def get_pdf_by_id(
 async def patch_pdf(
     pdf_id: str,
     update_data: PDFUpdateRequest,
-    db: AsyncIOMotorClient = Depends(get_database),
     repository: PDFRepository = Depends(get_pdf_repository),
 ):
     existing = await repository.find_by_id(pdf_id)
@@ -59,7 +53,6 @@ async def patch_pdf(
 @router.delete("/pdfs/{pdf_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_pdf_endpoint(
     pdf_id: str,
-    db: AsyncIOMotorClient = Depends(get_database),
     repository: PDFRepository = Depends(get_pdf_repository),
 ):
     existing = await repository.find_by_id(pdf_id)
