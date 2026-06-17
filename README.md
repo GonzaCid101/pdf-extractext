@@ -63,6 +63,14 @@ make db-up / make db-down
 # Detener contenedores
 make down
 
+#Pruebas de estres 
+El proyecto cuenta con una batería completa de pruebas automáticas y de estrés para garantizar la robustez del sistema.
+
+Validamos el flujo completo de los documentos y escenarios extraordinarios (archivos corruptos, formatos inválidos, payloads pesados).
+Para correr la suite completa en un entorno Docker aislado:
+```bash
+make test
+
 ```
 ## Variables de Entorno
 

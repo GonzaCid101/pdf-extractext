@@ -1,4 +1,4 @@
-.PHONY: test up down build
+.PHONY: test up down build stress
 
 up:
 	docker compose -f infra/docker-compose.db.yml up -d
@@ -19,6 +19,9 @@ db-up:
 
 db-down:
 	docker compose -f infra/docker-compose.db.yml down
+
+stress:
+	uv run locust -f locustfile.py --host http://localhost:8000
 
 # Abre Swagger automáticamente en el navegador predeterminado
 docs:

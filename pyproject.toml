@@ -32,3 +32,8 @@ cache_dir = "/tmp/.pytest_cache"
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
 
+[dependency-groups]
+dev = [
+    "locust>=2.44.3",
+]
+
