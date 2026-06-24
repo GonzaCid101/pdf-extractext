@@ -23,7 +23,7 @@ API REST para extraer texto de archivos PDF y almacenarlos en MongoDB. Permite s
 
 ## Tecnologias
 
-Python 3.14.0 | FastAPI | Pydantic | PyMuPDF | Motor | MongoDB | Docker | Pytest
+Python 3.14.0 | FastAPI | Pydantic | PyMuPDF | Motor | MongoDB | Docker | Pytest | Traefik
 
 ## Requisitos
 
@@ -52,18 +52,18 @@ make up
 make test
 
 La API estará disponible en:
-- **API:** http://localhost:8000
-- **Documentación interactiva:** http://localhost:8000/docs
+- **API:** https://api.universidad.localhost
+- **Documentación interactiva:** https://api.universidad.localhost/docs
     #Acceso directo
     make docs
 
 #Encender o apagar solo la base de datos
-make db-up / make db-down 
+make db-up / make db-down
 
 # Detener contenedores
 make down
 
-#Pruebas de estres 
+#Pruebas de estres
 El proyecto cuenta con una batería completa de pruebas automáticas y de estrés para garantizar la robustez del sistema.
 
 Validamos el flujo completo de los documentos y escenarios extraordinarios (archivos corruptos, formatos inválidos, payloads pesados).

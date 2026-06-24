@@ -21,16 +21,16 @@ db-down:
 	docker compose -f infra/docker-compose.db.yml down
 
 stress:
-	uv run locust -f locustfile.py --host http://localhost:8000
+	uv run locust -f locustfile.py --host https://api.universidad.localhost
 
 # Abre Swagger automáticamente en el navegador predeterminado
 docs:
 	@if [ "$$(uname)" = "Darwin" ]; then \
-		open http://localhost:8000/docs; \
+		open https://api.universidad.localhost/docs; \
 	elif [ "$$(uname)" = "Linux" ]; then \
 		if grep -q microsoft /proc/version; then \
-			powershell.exe -Command "start http://localhost:8000/docs"; \
+			powershell.exe -Command "start https://api.universidad.localhost/docs"; \
 		else \
-			xdg-open http://localhost:8000/docs; \
+			xdg-open https://api.universidad.localhost/docs; \
 		fi; \
 	fi

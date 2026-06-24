@@ -1,20 +1,24 @@
 services:
   app:
-    container_name: pdf-extractext-api
     image: pdf-extractext:${APP_VERSION:-1.0.0}
+    deploy:
+      replicas: 3
     environment:
       - TZ=America/Argentina/Mendoza
     build:
       context: ../
       dockerfile: infra/Dockerfile
-    ports:
-      - "8000:8000"
     env_file:
       - ../.env
     networks:
       - pdfnet
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.pdf-api.rule: "Host(`api.universidad.localhost`)"
+      traefik.http.routers.pdf-api.tls: "true"
+      traefik.http.services.pdf-api.loadbalancer.server.port: "8000"
 
 networks:
   pdfnet:
+    external: true
     name: red_compartida_pdf
-    driver: bridge
