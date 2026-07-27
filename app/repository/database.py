@@ -29,9 +29,6 @@ _db_manager = MongoManager()
 
 
 async def get_database() -> AsyncGenerator[AsyncIOMotorClient, None]:
-    mongo_uri = settings.MONGO_URI
-    client = AsyncIOMotorClient(mongo_uri)
-    try:
-        yield client
-    finally:
-        client.close()
+    client = _db_manager.get_client()
+    yield client
+    
