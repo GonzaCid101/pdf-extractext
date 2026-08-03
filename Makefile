@@ -26,11 +26,11 @@ stress:
 # Abre Swagger automáticamente en el navegador predeterminado
 docs:
 	@if [ "$$(uname)" = "Darwin" ]; then \
-		open https://api.universidad.localhost/docs; \
+		open https://pdf-extractext.universidad.localhost/docs; \
 	elif [ "$$(uname)" = "Linux" ]; then \
 		if grep -q microsoft /proc/version; then \
-			powershell.exe -Command "start https://api.universidad.localhost/docs"; \
+			powershell.exe -Command "start https://pdf-extractext.universidad.localhost/docs"; \
 		else \
-			xdg-open https://api.universidad.localhost/docs; \
+			xdg-open https://pdf-extractext.universidad.localhost/docs; \
 		fi; \
 	fi

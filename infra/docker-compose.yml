@@ -1,8 +1,6 @@
 services:
-  app:
+  pdf-extractext:
     image: pdf-extractext:${APP_VERSION:-1.0.0}
-    deploy:
-      replicas: 3
     environment:
       - TZ=America/Argentina/Mendoza
     build:
@@ -14,9 +12,9 @@ services:
       - pdfnet
     labels:
       traefik.enable: "true"
-      traefik.http.routers.pdf-api.rule: "Host(`api.universidad.localhost`)"
-      traefik.http.routers.pdf-api.tls: "true"
-      traefik.http.services.pdf-api.loadbalancer.server.port: "8000"
+      traefik.http.routers.pdf-extractext.rule: "Host(`pdf-extractext.universidad.localhost`)"
+      traefik.http.routers.pdf-extractext.tls: "true"
+      traefik.http.services.pdf-extractext.loadbalancer.server.port: "8000"
 
 networks:
   pdfnet:
