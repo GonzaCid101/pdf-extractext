@@ -18,6 +18,7 @@ API REST para extraer texto de archivos PDF y almacenarlos en MongoDB. Permite s
 - **Generación de checksums SHA-256** para verificación de integridad
 - **Almacenamiento en MongoDB** con Motor (driver asíncrono)
 - **API REST con FastAPI** y documentación automática Swagger UI
+- **Proxy Inverso y Enrutamiento** gestionado a través de Traefik.
 - **Arquitectura en capas** con separación de responsabilidades
 - **Configuración centralizada** mediante variables de entorno
 
@@ -31,12 +32,23 @@ Python 3.14.0 | FastAPI | Pydantic | PyMuPDF | Motor | MongoDB | Docker | Pytest
 |---|---|
 | Docker | 20.10+ |
 | Docker Compose | 2.0+ |
+| GNU Make | Instalado por defecto en Linux/macOS (usar Make for Windows si aplica) |
 
-## Instalación y configuración
+## Instalación y Configuración
 
+El proyecto utiliza un enfoque de infraestructura desacoplada. La aplicación funciona detrás de un proxy inverso (Traefik) que gestiona las peticiones y los certificados.
+
+# Paso 1: Levantar la Infraestructura Base (Traefik)
+Dado que Traefik actúa como un API Gateway global para nuestros microservicios, debe iniciarse primero.
+1. Dirígete a la carpeta externa donde se encuentra configurado Traefik.
+2. Levanta el servicio (esto creará la red compartida que nuestra API necesita):
+   ```bash
+   docker compose up -d
+# Paso 2: Despliegue de la API
+Una vez que la red compartida existe, levantamos nuestro proyecto:
 ```bash
 # 1. Clonar el repositorio
-git clone <url-del-repositorio>
+git clone <https://github.com/GonzaCid101/pdf-extractext>
 cd pdf-extractext
 
 # 2. Configurar variables de entorno
@@ -47,27 +59,22 @@ make build
 
 # 4. Levantar la infraestructura (Base de Datos + API)
 make up
-
-# 5. Correr los tests de forma aislada
-make test
-
+```
 La API estará disponible en:
 - **API:** https://api.universidad.localhost
 - **Documentación interactiva:** https://api.universidad.localhost/docs
-    #Acceso directo
-    make docs
+    #Acceso directo ejecutando: make docs
 
+* Comandos Útiles (Makefile)
+``` bash
 #Encender o apagar solo la base de datos
 make db-up / make db-down
 
 # Detener contenedores
 make down
-
-#Pruebas de estres
-El proyecto cuenta con una batería completa de pruebas automáticas y de estrés para garantizar la robustez del sistema.
-
+```
 Validamos el flujo completo de los documentos y escenarios extraordinarios (archivos corruptos, formatos inválidos, payloads pesados).
-Para correr la suite completa en un entorno Docker aislado:
+Para correr la suite completa de tests en un entorno Docker aislado:
 ```bash
 make test
 
