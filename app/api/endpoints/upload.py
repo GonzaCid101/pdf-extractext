@@ -50,5 +50,10 @@ async def upload_pdf(
         result = await service.process_and_save(file.filename, pdf_bytes)
     except DuplicatePDFError:
         raise DuplicatePDFException()
-        
+    except ValueError as error:
+        raise HTTPException(
+            status_code=415,
+            detail=str(error),
+        ) from error
+
     return PDFDocumentResponse(**result)

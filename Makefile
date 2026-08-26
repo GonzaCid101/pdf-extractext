@@ -12,7 +12,7 @@ build:
 	docker compose -f infra/docker-compose.yml build
 
 test:
-	docker compose -f infra/docker-compose.yml -f infra/docker-compose.test.yml run --rm app pytest tests/ -v
+	docker compose -f infra/docker-compose.yml -f infra/docker-compose.test.yml run --rm pdf-extractext pytest tests/ -v
 
 db-up:
 	docker compose -f infra/docker-compose.db.yml up -d

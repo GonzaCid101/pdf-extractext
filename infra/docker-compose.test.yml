@@ -1,5 +1,5 @@
 services:
-  app:
+  pdf-extractext:
     environment:
       - PYTHONPATH=/app
     volumes:
