@@ -1,7 +1,8 @@
 """Servicio de extracción y procesamiento de PDFs."""
 
 import fitz
-from app.repository.pdf_repository import PDFRepository, DuplicateRecordError
+from app.repository.pdf_repository import DuplicateRecordError
+from app.services.ports import PDFRepositoryPort
 from app.services.checksum import ChecksumService
 
 
@@ -12,7 +13,7 @@ class DuplicatePDFError(Exception):
 class PDFService:
     def __init__(
         self,
-        repository: PDFRepository,
+        repository: PDFRepositoryPort,
         checksum_service: ChecksumService | None = None,
     ) -> None:
         self._repository = repository
