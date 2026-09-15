@@ -60,7 +60,7 @@ class TestEdgeCasesAndRobustness:
             "/upload-pdf",
             files={"file": ("heavy.pdf", BytesIO(large_bytes), "application/pdf")},
         )
-        assert response.status_code in {400, 413}
+        assert response.status_code == 413
 
     async def test_patch_invalid_payload_returns_422(
         self, async_client, pdf_collection
