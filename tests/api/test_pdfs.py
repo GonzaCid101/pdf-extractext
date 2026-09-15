@@ -55,7 +55,7 @@ class TestPatchPDF:
     async def test_patch_pdf_updates_filename_successfully(
         self, async_client, pdf_collection
     ):
-        # Given: Insertar PDF de prueba
+
         pdf_document = {
             "filename": "original.pdf",
             "extracted_text": "Texto original del documento",
@@ -64,11 +64,9 @@ class TestPatchPDF:
         result = await pdf_collection.insert_one(pdf_document)
         pdf_id = str(result.inserted_id)
 
-        # When: Actualizar filename
         update_data = {"filename": "updated_document.pdf"}
         response = await async_client.patch(f"/pdfs/{pdf_id}", json=update_data)
 
-        # Then
         assert response.status_code == 200
         data = response.json()
         assert data["filename"] == "updated_document.pdf"
@@ -76,16 +74,14 @@ class TestPatchPDF:
         assert data["checksum"] == "abc123checksum"
 
     async def test_patch_pdf_not_found_returns_404(self, async_client, pdf_collection):
-        # Given
+
         non_existent_id = "65797e91c185b4c7c5a93a99"
 
-        # When
         update_data = {"filename": "new_name.pdf"}
         response = await async_client.patch(
             f"/pdfs/{non_existent_id}", json=update_data
         )
 
-        # Then
         assert response.status_code == 404
         assert "detail" in response.json()
 
@@ -95,7 +91,6 @@ class TestDeletePDF:
     async def test_delete_pdf_removes_document_successfully(
         self, async_client, pdf_collection
     ):
-        # Given: Insertar PDF de prueba
         pdf_document = {
             "filename": "to_delete.pdf",
             "extracted_text": "Texto a eliminar",
@@ -104,24 +99,19 @@ class TestDeletePDF:
         result = await pdf_collection.insert_one(pdf_document)
         pdf_id = str(result.inserted_id)
 
-        # When: Eliminar
         response = await async_client.delete(f"/pdfs/{pdf_id}")
 
-        # Then
         assert response.status_code == 204
 
-        # Verificar que ya no existe
         get_response = await async_client.get(f"/pdfs/{pdf_id}")
         assert get_response.status_code == 404
 
     async def test_delete_pdf_not_found_returns_404(self, async_client, pdf_collection):
-        # Given
+        
         non_existent_id = "65797e91c185b4c7c5a93a99"
 
-        # When
         response = await async_client.delete(f"/pdfs/{non_existent_id}")
 
-        # Then
         assert response.status_code == 404
         assert "detail" in response.json()
 
