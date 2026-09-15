@@ -1,5 +1,6 @@
 """Tests para endpoint de subida de PDF."""
 
+import hashlib
 from io import BytesIO
 
 import pytest
@@ -51,12 +52,9 @@ class TestUploadPDF:
         assert "detail" in response.json()
 
     async def test_valid_pdf_returns_201_with_extracted_data(
-        self, async_client, pdf_collection, pdf_bytes
+        self, async_client, pdf_collection, pdf_bytes, pdf_text_content
     ):
-        pdf_service = PDFService(pdf_collection)
-        expected_text = pdf_service.extract_text(pdf_bytes)
-
-        expected_checksum = ChecksumService().generate(pdf_bytes)
+        expected_checksum = hashlib.sha256(pdf_bytes).hexdigest()
 
         response = await async_client.post(
             "/upload-pdf",
@@ -66,7 +64,8 @@ class TestUploadPDF:
         assert response.status_code == 201
         data = response.json()
         assert data["filename"] == "dummy.pdf"
-        assert data["extracted_text"] == expected_text
+        for expected_fragment in pdf_text_content:
+            assert expected_fragment in data["extracted_text"]
         assert data["checksum"] == expected_checksum
         assert "_id" in data
 
