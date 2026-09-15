@@ -124,3 +124,29 @@ class TestDeletePDF:
         # Then
         assert response.status_code == 404
         assert "detail" in response.json()
+
+class TestInvalidObjectId:
+    """Issue #94: IDs malformados deben devolver 400 con RFC 9457, nunca 500."""
+
+    async def test_get_pdf_with_malformed_id_does_not_raise_500(
+        self, async_client
+    ):
+        response = await async_client.get("/pdfs/abc")
+
+        assert response.status_code != 500
+
+    async def test_get_pdf_with_malformed_id_returns_400(self, async_client):
+        response = await async_client.get("/pdfs/abc")
+
+        assert response.status_code == 400
+
+    async def test_malformed_id_returns_rfc9457_problem_json(self, async_client):
+        response = await async_client.get("/pdfs/abc")
+
+        assert response.headers["content-type"].startswith(
+            "application/problem+json"
+        )
+        problem = response.json()
+        assert problem["status"] == 400
+        for field in ("type", "title", "detail", "instance"):
+            assert field in problem

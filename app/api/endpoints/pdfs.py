@@ -1,9 +1,11 @@
 """Endpoints para consultar documentos PDF guardados."""
 
+from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.dependencies import get_pdf_repository
 from app.domain.pdf_document import PDFDocument
+from app.exceptions.rfc9457 import InvalidObjectIdException
 from app.models.pdf_models import PDFUpdateRequest
 from app.repository.pdf_repository import PDFRepository
 
@@ -19,6 +21,11 @@ def _serialize_document(document: PDFDocument) -> dict:
     }
 
 
+def _validate_object_id(pdf_id: str) -> None:
+    if not ObjectId.is_valid(pdf_id):
+        raise InvalidObjectIdException(instance=f"/pdfs/{pdf_id}")
+
+
 @router.get("/pdfs")
 async def get_all_pdfs(
     repository: PDFRepository = Depends(get_pdf_repository),
@@ -32,6 +39,7 @@ async def get_pdf_by_id(
     pdf_id: str,
     repository: PDFRepository = Depends(get_pdf_repository),
 ):
+    _validate_object_id(pdf_id)
     document = await repository.find_by_id(pdf_id)
     if document is None:
         raise HTTPException(status_code=404, detail="PDF no encontrado")
@@ -44,6 +52,7 @@ async def patch_pdf(
     update_data: PDFUpdateRequest,
     repository: PDFRepository = Depends(get_pdf_repository),
 ):
+    _validate_object_id(pdf_id)
     existing = await repository.find_by_id(pdf_id)
     if existing is None:
         raise HTTPException(status_code=404, detail="PDF no encontrado")
@@ -60,6 +69,7 @@ async def delete_pdf_endpoint(
     pdf_id: str,
     repository: PDFRepository = Depends(get_pdf_repository),
 ):
+    _validate_object_id(pdf_id)
     existing = await repository.find_by_id(pdf_id)
     if existing is None:
         raise HTTPException(status_code=404, detail="PDF no encontrado")

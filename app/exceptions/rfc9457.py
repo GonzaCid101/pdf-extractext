@@ -46,3 +46,19 @@ class DuplicatePDFException(RFC9457Exception):
             detail=detail,
             instance="/upload-pdf",
         )
+
+
+class InvalidObjectIdException(RFC9457Exception):
+
+    def __init__(
+        self,
+        instance: str,
+        detail: str = "El identificador proporcionado no es un ObjectId válido",
+    ) -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:invalid-object-id",
+            title="ObjectId malformado",
+            status=status.HTTP_400_BAD_REQUEST,
+            detail=detail,
+            instance=instance,
+        )
