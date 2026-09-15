@@ -3,15 +3,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.dependencies import get_pdf_repository
+from app.domain.pdf_document import PDFDocument
 from app.models.pdf_models import PDFUpdateRequest
 from app.repository.pdf_repository import PDFRepository
 
 router = APIRouter()
 
 
-def _serialize_document(doc: dict) -> dict:
-    doc["_id"] = str(doc["_id"])
-    return doc
+def _serialize_document(document: PDFDocument) -> dict:
+    return {
+        "id": document.id,
+        "filename": document.filename,
+        "extracted_text": document.extracted_text,
+        "checksum": document.checksum,
+    }
 
 
 @router.get("/pdfs")

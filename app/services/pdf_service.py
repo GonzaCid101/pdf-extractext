@@ -1,9 +1,10 @@
 """Servicio de extracción y procesamiento de PDFs."""
 
 import fitz
-from app.repository.pdf_repository import DuplicateRecordError
-from app.services.ports import PDFRepositoryPort
+
+from app.domain.pdf_document import PDFDocument
 from app.services.checksum import ChecksumService
+from app.services.ports import PDFRepositoryPort
 
 
 class DuplicatePDFError(Exception):
@@ -29,18 +30,17 @@ class PDFService:
             raise ValueError(f"Contenido PDF inválido: {error}") from error
         return extracted_text
 
-    async def process_and_save(self, filename: str, pdf_content: bytes) -> dict:
-        extracted_text = self.extract_text(pdf_content)
-        checksum = self._checksum_service.generate(pdf_content)
+    async def process_and_save(self, filename: str, pdf_content: bytes) -> PDFDocument:
+        document = PDFDocument(
+            id="",
+            filename=filename,
+            extracted_text=self.extract_text(pdf_content),
+            checksum=self._checksum_service.generate(pdf_content),
+        )
 
-        document = {
-            "filename": filename,
-            "extracted_text": extracted_text,
-            "checksum": checksum,
-        }
-        try:
-            document["_id"] = await self._repository.save(document)
-        except DuplicateRecordError:
+        if await self._repository.find_by_checksum(document.checksum) is not None:
             raise DuplicatePDFError("El documento ya existe en el sistema")
+
+        document.id = await self._repository.save(document)
 
         return document

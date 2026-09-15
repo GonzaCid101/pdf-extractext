@@ -56,4 +56,9 @@ async def upload_pdf(
             detail=str(error),
         ) from error
 
-    return PDFDocumentResponse(**result)
+    return PDFDocumentResponse(
+        id=result.id,
+        filename=result.filename,
+        extracted_text=result.extracted_text,
+        checksum=result.checksum,
+    )

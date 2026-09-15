@@ -2,11 +2,11 @@
 
 from io import BytesIO
 
-import pytest
 from bson import ObjectId
 
-from app.services.pdf_service import PDFService
+from app.repository.pdf_repository import PDFRepository
 from app.services.checksum import ChecksumService
+from app.services.pdf_service import PDFService
 
 
 class TestUploadPDF:
@@ -22,10 +22,10 @@ class TestUploadPDF:
 
         assert response.status_code == 201
         data = response.json()
-        assert "_id" in data
+        assert "id" in data
         assert data["filename"] == "new_document.pdf"
 
-        found = await pdf_collection.find_one({"_id": ObjectId(data["_id"])})
+        found = await pdf_collection.find_one({"_id": ObjectId(data["id"])})
         assert found is not None
         assert found["checksum"] == data["checksum"]
 
@@ -51,11 +51,10 @@ class TestUploadPDF:
         assert "detail" in response.json()
 
     async def test_valid_pdf_returns_201_with_extracted_data(
-        self, async_client, pdf_collection, pdf_bytes
+        self, async_client, mongo_client, pdf_collection, pdf_bytes
     ):
-        pdf_service = PDFService(pdf_collection)
+        pdf_service = PDFService(PDFRepository(mongo_client))
         expected_text = pdf_service.extract_text(pdf_bytes)
-
         expected_checksum = ChecksumService().generate(pdf_bytes)
 
         response = await async_client.post(
@@ -68,7 +67,7 @@ class TestUploadPDF:
         assert data["filename"] == "dummy.pdf"
         assert data["extracted_text"] == expected_text
         assert data["checksum"] == expected_checksum
-        assert "_id" in data
+        assert "id" in data
 
     async def test_txt_file_returns_415(self, async_client, pdf_collection):
         response = await async_client.post(

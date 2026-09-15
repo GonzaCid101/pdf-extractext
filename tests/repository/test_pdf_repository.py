@@ -2,16 +2,18 @@
 
 from bson import ObjectId
 
+from app.domain.pdf_document import PDFDocument
 from app.repository.pdf_repository import PDFRepository
 
 
 class TestPDFRepository:
     async def test_save_pdf_inserts_document(self, mongo_client, pdf_collection):
-        document = {
-            "filename": "test.pdf",
-            "extracted_text": "texto extraído",
-            "checksum": "abc123",
-        }
+        document = PDFDocument(
+            id="",
+            filename="test.pdf",
+            extracted_text="texto extraído",
+            checksum="abc123",
+        )
         repository = PDFRepository(mongo_client)
         inserted_id = await repository.save(document)
 
@@ -24,19 +26,20 @@ class TestPDFRepository:
     async def test_find_by_checksum_returns_document(
         self, mongo_client, pdf_collection
     ):
-        document = {
-            "filename": "test.pdf",
-            "extracted_text": "texto",
-            "checksum": "duplicate_checksum",
-        }
-        await pdf_collection.insert_one(document)
+        await pdf_collection.insert_one(
+            {
+                "filename": "test.pdf",
+                "extracted_text": "texto",
+                "checksum": "duplicate_checksum",
+            }
+        )
 
         repository = PDFRepository(mongo_client)
         result = await repository.find_by_checksum("duplicate_checksum")
 
         assert result is not None
-        assert result["checksum"] == "duplicate_checksum"
-        assert result["filename"] == "test.pdf"
+        assert result.checksum == "duplicate_checksum"
+        assert result.filename == "test.pdf"
 
     async def test_find_by_checksum_returns_none(self, mongo_client, pdf_collection):
         repository = PDFRepository(mongo_client)
