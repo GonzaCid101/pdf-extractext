@@ -13,7 +13,7 @@ from app.main import app
 from app.repository.database import get_database
 
 
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
+FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 DUMMY_PDF_PATH = FIXTURES_DIR / "dummy.pdf"
 
 

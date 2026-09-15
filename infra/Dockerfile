@@ -15,7 +15,7 @@ COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen
 
 COPY app/ ./app/
-
+COPY fixtures/ ./fixtures/
 # -- Etapa Runner --
 FROM python:3.14.0-slim AS runner
 
@@ -34,7 +34,7 @@ WORKDIR /app
 # Obtener dependencias y codigo del builder
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/app /app/app
-
+COPY --from=builder /app/fixtures /app/fixtures
 # Asignar permisos
 RUN chown -R appuser:appgroup /app
 
