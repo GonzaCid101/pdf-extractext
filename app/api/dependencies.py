@@ -10,9 +10,9 @@ from app.services.pdf_service import PDFService
 
 
 async def get_pdf_repository(
-    db: AsyncIOMotorClient = Depends(get_database),
+    client: AsyncIOMotorClient = Depends(get_database),
 ) -> PDFRepository:
-    return PDFRepository(db)
+    return PDFRepository(client)
 
 
 async def get_pdf_service(

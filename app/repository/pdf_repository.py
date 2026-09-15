@@ -14,8 +14,8 @@ class DuplicateRecordError(Exception):
 
 
 class PDFRepository:
-    def __init__(self, db: AsyncIOMotorClient) -> None:
-        self._collection = db[settings.MONGO_DATABASE_NAME][
+    def __init__(self, client: AsyncIOMotorClient) -> None:
+        self._collection = client[settings.MONGO_DATABASE_NAME][
             settings.MONGO_COLLECTION_NAME
         ]
 
@@ -30,10 +30,6 @@ class PDFRepository:
             raise DuplicateRecordError(
                 "Document with same checksum already exists"
             ) from error
-
-    async def find_by_checksum(self, checksum: str) -> PDFDocument | None:
-        mongo_doc = await self._collection.find_one({"checksum": checksum})
-        return mongo_to_domain(mongo_doc) if mongo_doc else None
 
     async def find_by_id(self, pdf_id: str) -> PDFDocument | None:
         mongo_doc = await self._collection.find_one({"_id": ObjectId(pdf_id)})

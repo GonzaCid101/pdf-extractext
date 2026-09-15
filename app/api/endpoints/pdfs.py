@@ -65,7 +65,7 @@ async def patch_pdf(
 
 
 @router.delete("/pdfs/{pdf_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_pdf_endpoint(
+async def delete_pdf(
     pdf_id: str,
     repository: PDFRepository = Depends(get_pdf_repository),
 ):
