@@ -14,8 +14,8 @@ class DuplicateRecordError(Exception):
 
 
 class PDFRepository:
-    def __init__(self, db: AsyncIOMotorClient) -> None:
-        self._collection = db[settings.MONGO_DATABASE_NAME][
+    def __init__(self, client: AsyncIOMotorClient) -> None:
+        self._collection = client[settings.MONGO_DATABASE_NAME][
             settings.MONGO_COLLECTION_NAME
         ]
 
