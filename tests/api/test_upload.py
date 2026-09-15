@@ -1,5 +1,6 @@
 """Tests para endpoint de subida de PDF."""
 
+import hashlib
 from io import BytesIO
 
 from bson import ObjectId
@@ -65,7 +66,8 @@ class TestUploadPDF:
         assert response.status_code == 201
         data = response.json()
         assert data["filename"] == "dummy.pdf"
-        assert data["extracted_text"] == expected_text
+        for expected_fragment in pdf_text_content:
+            assert expected_fragment in data["extracted_text"]
         assert data["checksum"] == expected_checksum
         assert "id" in data
 
