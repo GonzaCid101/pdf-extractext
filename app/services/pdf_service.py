@@ -11,6 +11,13 @@ class DuplicatePDFError(Exception):
     pass
 
 
+class FilenameTooLongError(ValueError):
+    pass
+
+
+MAX_FILENAME_LENGTH = 100
+
+
 class PDFService:
     def __init__(
         self,
@@ -31,6 +38,12 @@ class PDFService:
         return extracted_text
 
     async def process_and_save(self, filename: str, pdf_content: bytes) -> PDFDocument:
+        # FASE GREEN: Implementación mínima para pasar el test
+        if len(filename) > MAX_FILENAME_LENGTH:
+            raise FilenameTooLongError(
+                f"El nombre del archivo excede los {MAX_FILENAME_LENGTH} caracteres"
+            )
+
         document = PDFDocument(
             id="",
             filename=filename,
