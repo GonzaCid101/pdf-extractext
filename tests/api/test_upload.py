@@ -52,10 +52,9 @@ class TestUploadPDF:
         assert "detail" in response.json()
 
     async def test_valid_pdf_returns_201_with_extracted_data(
-        self, async_client, mongo_client, pdf_collection, pdf_bytes
+        self, async_client, mongo_client, pdf_collection, pdf_bytes, pdf_text_content
     ):
         pdf_service = PDFService(PDFRepository(mongo_client))
-        expected_text = pdf_service.extract_text(pdf_bytes)
         expected_checksum = ChecksumService().generate(pdf_bytes)
 
         response = await async_client.post(
