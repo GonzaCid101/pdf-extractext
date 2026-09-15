@@ -1,13 +1,16 @@
-from locust import HttpUser, task, between
-import random
+"""Pruebas de carga con Locust contra la API de PDFs."""
+
 import io
+import random
+from pathlib import Path
+
+from locust import HttpUser, between, task
+
+DUMMY_PDF_PATH = Path("fixtures/dummy.pdf")
 
 
 class PDFUser(HttpUser):
     wait_time = between(1, 3)
-
-    def _generate_pdf(self) -> bytes:
-        return b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Kids []\n/Count 0\n>>\nendobj\ntrailer\n<<\n/Root 1 0 R\n>>\n%%EOF"
 
     @task(3)
     def get_pdfs(self):
@@ -15,7 +18,7 @@ class PDFUser(HttpUser):
 
     @task(1)
     def upload_pdf(self):
-        pdf_bytes = self._generate_pdf()
+        pdf_bytes = DUMMY_PDF_PATH.read_bytes()
         files = {"file": ("test.pdf", io.BytesIO(pdf_bytes), "application/pdf")}
         self.client.post("/upload-pdf", files=files)
 
