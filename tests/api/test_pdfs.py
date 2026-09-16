@@ -55,7 +55,6 @@ class TestPatchPDF:
     async def test_patch_pdf_updates_filename_successfully(
         self, async_client, pdf_collection
     ):
-
         pdf_document = {
             "filename": "original.pdf",
             "extracted_text": "Texto original del documento",
@@ -74,7 +73,6 @@ class TestPatchPDF:
         assert data["checksum"] == "abc123checksum"
 
     async def test_patch_pdf_not_found_returns_404(self, async_client, pdf_collection):
-
         non_existent_id = "65797e91c185b4c7c5a93a99"
 
         update_data = {"filename": "new_name.pdf"}
@@ -107,7 +105,6 @@ class TestDeletePDF:
         assert get_response.status_code == 404
 
     async def test_delete_pdf_not_found_returns_404(self, async_client, pdf_collection):
-        
         non_existent_id = "65797e91c185b4c7c5a93a99"
 
         response = await async_client.delete(f"/pdfs/{non_existent_id}")
