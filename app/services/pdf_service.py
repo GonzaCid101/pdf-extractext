@@ -15,6 +15,14 @@ class FilenameTooLongError(ValueError):
     pass
 
 
+class PDFNotFoundError(Exception):
+    pass
+
+
+class PDFNotFoundError(Exception):
+    pass
+
+
 MAX_FILENAME_LENGTH = 100
 
 
@@ -57,3 +65,45 @@ class PDFService:
             raise DuplicatePDFError("El documento ya existe en el sistema") from error
 
         return document
+
+    async def get_all(self) -> list[PDFDocument]:
+        return await self._repository.get_all()
+
+    async def get_by_id(self, pdf_id: str) -> PDFDocument:
+        document = await self._repository.find_by_id(pdf_id)
+        if document is None:
+            raise PDFNotFoundError(f"PDF con id '{pdf_id}' no encontrado")
+        return document
+
+    async def update_filename(self, pdf_id: str, filename: str) -> PDFDocument:
+        document = await self.get_by_id(pdf_id)
+        await self._repository.update(pdf_id, {"filename": filename})
+        document.filename = filename
+        return document
+
+    async def delete(self, pdf_id: str) -> None:
+        document = await self._repository.find_by_id(pdf_id)
+        if document is None:
+            raise PDFNotFoundError(f"PDF con id '{pdf_id}' no encontrado")
+        await self._repository.delete(pdf_id)
+
+    async def get_all(self) -> list[PDFDocument]:
+        return await self._repository.get_all()
+
+    async def get_by_id(self, pdf_id: str) -> PDFDocument:
+        document = await self._repository.find_by_id(pdf_id)
+        if document is None:
+            raise PDFNotFoundError(f"PDF con id '{pdf_id}' no encontrado")
+        return document
+
+    async def update_filename(self, pdf_id: str, filename: str) -> PDFDocument:
+        document = await self.get_by_id(pdf_id)
+        await self._repository.update(pdf_id, {"filename": filename})
+        document.filename = filename
+        return document
+
+    async def delete(self, pdf_id: str) -> None:
+        document = await self._repository.find_by_id(pdf_id)
+        if document is None:
+            raise PDFNotFoundError(f"PDF con id '{pdf_id}' no encontrado")
+        await self._repository.delete(pdf_id)
