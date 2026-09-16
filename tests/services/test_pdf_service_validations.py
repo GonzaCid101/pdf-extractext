@@ -17,9 +17,6 @@ class InMemoryPDFRepository:
         self.saved.append(document)
         return "65f1a2b3c4d5e6f7a8b9c0d1"
 
-    async def find_by_checksum(self, checksum: str) -> PDFDocument | None:
-        return next((d for d in self.saved if d.checksum == checksum), None)
-
 
 class TestFilenameValidation:
 

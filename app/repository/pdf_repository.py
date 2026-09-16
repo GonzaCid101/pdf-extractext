@@ -7,10 +7,7 @@ from pymongo.errors import DuplicateKeyError
 from app.core.config import settings
 from app.domain.pdf_document import PDFDocument
 from app.repository.mappers import domain_to_mongo, mongo_to_domain
-
-
-class DuplicateRecordError(Exception):
-    pass
+from app.services.ports import DuplicateRecordError
 
 
 class PDFRepository:

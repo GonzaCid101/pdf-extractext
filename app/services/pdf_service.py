@@ -4,7 +4,7 @@ import fitz
 
 from app.domain.pdf_document import PDFDocument
 from app.services.checksum import ChecksumService
-from app.services.ports import PDFRepositoryPort
+from app.services.ports import DuplicateRecordError, PDFRepositoryPort
 
 
 class DuplicatePDFError(Exception):
@@ -51,9 +51,9 @@ class PDFService:
             checksum=self._checksum_service.generate(pdf_content),
         )
 
-        if await self._repository.find_by_checksum(document.checksum) is not None:
-            raise DuplicatePDFError("El documento ya existe en el sistema")
-
-        document.id = await self._repository.save(document)
+        try:
+            document.id = await self._repository.save(document)
+        except DuplicateRecordError as error:
+            raise DuplicatePDFError("El documento ya existe en el sistema") from error
 
         return document

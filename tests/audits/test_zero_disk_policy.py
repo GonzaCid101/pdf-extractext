@@ -49,15 +49,9 @@ def test_upload_pdf_zero_disk_policy(
 ) -> None:
     # Mitigación #84: el PDF ahora es válido y completaría el flujo,
     # así que cortamos la capa de persistencia para no tocar MongoDB real.
-    with (
-        patch(
-            "app.repository.pdf_repository.PDFRepository.find_by_checksum",
-            new=AsyncMock(return_value=None),
-        ),
-        patch(
-            "app.repository.pdf_repository.PDFRepository.save",
-            new=AsyncMock(return_value="000000000000000000000000"),
-        ),
+    with patch(
+        "app.repository.pdf_repository.PDFRepository.save",
+        new=AsyncMock(return_value="000000000000000000000000"),
     ):
         test_client = TestClient(app)
         response = test_client.post(

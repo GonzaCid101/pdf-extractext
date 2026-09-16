@@ -1,7 +1,7 @@
 """Implementaciones falsas (in-memory) para tests de servicios.
 """
 
-from app.repository.pdf_repository import DuplicateRecordError
+from app.services.ports import DuplicateRecordError
 
 
 class FakePDFRepository:

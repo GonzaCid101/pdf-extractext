@@ -5,5 +5,9 @@ from typing import Protocol
 from app.domain.pdf_document import PDFDocument
 
 
+class DuplicateRecordError(Exception):
+    pass
+
+
 class PDFRepositoryPort(Protocol):
     async def save(self, document: PDFDocument) -> str: ...
