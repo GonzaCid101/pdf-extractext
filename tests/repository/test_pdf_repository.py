@@ -67,3 +67,73 @@ class TestPDFRepository:
         documents = await repository.get_all()
 
         assert documents == []
+
+    async def test_update_existing_document_returns_true_and_updates_fields(
+        self, mongo_client, pdf_collection
+    ):
+        # Arrange
+        result = await pdf_collection.insert_one(
+            {
+                "filename": "original.pdf",
+                "extracted_text": "texto original",
+                "checksum": "update_checksum",
+            }
+        )
+        document_id = str(result.inserted_id)
+
+        # Act
+        repository = PDFRepository(mongo_client)
+        updated = await repository.update(document_id, {"filename": "renombrado.pdf"})
+
+        # Assert
+        assert updated is True
+        found = await pdf_collection.find_one({"_id": ObjectId(document_id)})
+        assert found["filename"] == "renombrado.pdf"
+        assert found["extracted_text"] == "texto original"
+        assert found["checksum"] == "update_checksum"
+
+    async def test_update_nonexistent_document_returns_false(
+        self, mongo_client, pdf_collection
+    ):
+        # Arrange
+        repository = PDFRepository(mongo_client)
+
+        # Act
+        updated = await repository.update(str(ObjectId()), {"filename": "nada.pdf"})
+
+        # Assert
+        assert updated is False
+
+    async def test_delete_existing_document_returns_true_and_removes_it(
+        self, mongo_client, pdf_collection
+    ):
+        # Arrange
+        result = await pdf_collection.insert_one(
+            {
+                "filename": "borrar.pdf",
+                "extracted_text": "texto a eliminar",
+                "checksum": "delete_checksum",
+            }
+        )
+        document_id = str(result.inserted_id)
+
+        # Act
+        repository = PDFRepository(mongo_client)
+        deleted = await repository.delete(document_id)
+
+        # Assert
+        assert deleted is True
+        found = await pdf_collection.find_one({"_id": ObjectId(document_id)})
+        assert found is None
+
+    async def test_delete_nonexistent_document_returns_false(
+        self, mongo_client, pdf_collection
+    ):
+        # Arrange
+        repository = PDFRepository(mongo_client)
+
+        # Act
+        deleted = await repository.delete(str(ObjectId()))
+
+        # Assert
+        assert deleted is False
