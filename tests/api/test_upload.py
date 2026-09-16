@@ -2,12 +2,7 @@
 
 import hashlib
 from io import BytesIO
-
 from bson import ObjectId
-
-from app.repository.pdf_repository import PDFRepository
-from app.services.checksum import ChecksumService
-from app.services.pdf_service import PDFService
 
 
 class TestUploadPDF:
@@ -33,7 +28,7 @@ class TestUploadPDF:
     async def test_upload_duplicate_pdf_returns_409(
         self, async_client, mongo_client, pdf_collection, pdf_bytes
     ):
-        checksum = ChecksumService().generate(pdf_bytes)
+        checksum = hashlib.sha256(pdf_bytes).hexdigest()
 
         await pdf_collection.insert_one(
             {
@@ -54,8 +49,7 @@ class TestUploadPDF:
     async def test_valid_pdf_returns_201_with_extracted_data(
         self, async_client, mongo_client, pdf_collection, pdf_bytes, pdf_text_content
     ):
-        pdf_service = PDFService(PDFRepository(mongo_client))
-        expected_checksum = ChecksumService().generate(pdf_bytes)
+        expected_checksum = hashlib.sha256(pdf_bytes).hexdigest()
 
         response = await async_client.post(
             "/upload-pdf",
