@@ -1,79 +1,83 @@
 """Endpoints para consultar documentos PDF guardados."""
 
-from bson import ObjectId
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.dependencies import get_pdf_repository
+from app.api.dependencies import get_pdf_service
 from app.domain.pdf_document import PDFDocument
 from app.exceptions.rfc9457 import InvalidObjectIdException
-from app.models.pdf_models import PDFUpdateRequest
-from app.repository.pdf_repository import PDFRepository
+from app.models.pdf_models import PDFDocumentResponse, PDFUpdateRequest
+from app.services.pdf_service import PDFNotFoundError, PDFService
 
 router = APIRouter()
 
+_OBJECT_ID_PATTERN = re.compile(r"^[0-9a-fA-F]{24}$")
 
-def _serialize_document(document: PDFDocument) -> dict:
-    return {
-        "id": document.id,
-        "filename": document.filename,
-        "extracted_text": document.extracted_text,
-        "checksum": document.checksum,
-    }
+
+def _to_response(document: PDFDocument) -> PDFDocumentResponse:
+    """Mapeo explícito de entidad de dominio a DTO de respuesta."""
+    return PDFDocumentResponse(
+        id=document.id,
+        filename=document.filename,
+        extracted_text=document.extracted_text,
+        checksum=document.checksum,
+    )
 
 
 def _validate_object_id(pdf_id: str) -> None:
-    if not ObjectId.is_valid(pdf_id):
+    if not _OBJECT_ID_PATTERN.fullmatch(pdf_id):
         raise InvalidObjectIdException(instance=f"/pdfs/{pdf_id}")
 
 
-@router.get("/pdfs")
+@router.get("/pdfs", response_model=list[PDFDocumentResponse])
 async def get_all_pdfs(
-    repository: PDFRepository = Depends(get_pdf_repository),
+    service: PDFService = Depends(get_pdf_service),
 ):
-    documents = await repository.get_all()
-    return [_serialize_document(doc) for doc in documents]
+    documents = await service.get_all()
+    return [_to_response(doc) for doc in documents]
 
 
-@router.get("/pdfs/{pdf_id}")
+@router.get("/pdfs/{pdf_id}", response_model=PDFDocumentResponse)
 async def get_pdf_by_id(
     pdf_id: str,
-    repository: PDFRepository = Depends(get_pdf_repository),
+    service: PDFService = Depends(get_pdf_service),
 ):
     _validate_object_id(pdf_id)
-    document = await repository.find_by_id(pdf_id)
-    if document is None:
+    try:
+        document = await service.get_by_id(pdf_id)
+    except PDFNotFoundError:
         raise HTTPException(status_code=404, detail="PDF no encontrado")
-    return _serialize_document(document)
+    return _to_response(document)
 
 
-@router.patch("/pdfs/{pdf_id}")
+@router.patch("/pdfs/{pdf_id}", response_model=PDFDocumentResponse)
 async def patch_pdf(
     pdf_id: str,
     update_data: PDFUpdateRequest,
-    repository: PDFRepository = Depends(get_pdf_repository),
+    service: PDFService = Depends(get_pdf_service),
 ):
     _validate_object_id(pdf_id)
-    existing = await repository.find_by_id(pdf_id)
-    if existing is None:
+    if update_data.filename is None:
+        raise HTTPException(
+            status_code=400,
+            detail="No se proporcionó ningún campo para actualizar",
+        )
+    try:
+        document = await service.update_filename(pdf_id, update_data.filename)
+    except PDFNotFoundError:
         raise HTTPException(status_code=404, detail="PDF no encontrado")
-
-    update_dict = update_data.model_dump(exclude_unset=True, exclude_none=True)
-    await repository.update(pdf_id, update_dict)
-
-    updated = await repository.find_by_id(pdf_id)
-    return _serialize_document(updated)
+    return _to_response(document)
 
 
 @router.delete("/pdfs/{pdf_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_pdf(
     pdf_id: str,
-    repository: PDFRepository = Depends(get_pdf_repository),
+    service: PDFService = Depends(get_pdf_service),
 ):
     _validate_object_id(pdf_id)
-    existing = await repository.find_by_id(pdf_id)
-    if existing is None:
+    try:
+        await service.delete(pdf_id)
+    except PDFNotFoundError:
         raise HTTPException(status_code=404, detail="PDF no encontrado")
-
-    await repository.delete(pdf_id)
-
     return None
