@@ -8,7 +8,7 @@ class TestUploadPDF:
     """Tests para POST /upload-pdf."""
 
     async def test_upload_pdf_saves_to_database_returns_201(
-        self, async_client, mongo_client, pdf_collection, pdf_bytes
+        self, async_client, pdf_collection, pdf_bytes
     ):
         response = await async_client.post(
             "/upload-pdf",
@@ -27,7 +27,7 @@ class TestUploadPDF:
         assert persisted["checksum"] == data["checksum"]
 
     async def test_upload_duplicate_pdf_returns_409(
-        self, async_client, mongo_client, pdf_collection, pdf_bytes
+        self, async_client, pdf_collection, pdf_bytes
     ):
         checksum = hashlib.sha256(pdf_bytes).hexdigest()
 
@@ -48,7 +48,7 @@ class TestUploadPDF:
         assert "detail" in response.json()
 
     async def test_valid_pdf_returns_201_with_extracted_data(
-        self, async_client, mongo_client, pdf_collection, pdf_bytes, pdf_text_content
+        self, async_client, pdf_collection, pdf_bytes, pdf_text_content
     ):
         expected_checksum = hashlib.sha256(pdf_bytes).hexdigest()
 
