@@ -2,7 +2,6 @@
 
 import hashlib
 from io import BytesIO
-from bson import ObjectId
 
 
 class TestUploadPDF:
@@ -18,12 +17,14 @@ class TestUploadPDF:
 
         assert response.status_code == 201
         data = response.json()
-        assert "id" in data
+        assert "_id" in data
         assert data["filename"] == "new_document.pdf"
 
-        found = await pdf_collection.find_one({"_id": ObjectId(data["id"])})
-        assert found is not None
-        assert found["checksum"] == data["checksum"]
+        get_response = await async_client.get(f"/pdfs/{data['_id']}")
+        assert get_response.status_code == 200
+        persisted = get_response.json()
+        assert persisted["_id"] == data["_id"]
+        assert persisted["checksum"] == data["checksum"]
 
     async def test_upload_duplicate_pdf_returns_409(
         self, async_client, mongo_client, pdf_collection, pdf_bytes
@@ -62,7 +63,7 @@ class TestUploadPDF:
         for expected_fragment in pdf_text_content:
             assert expected_fragment in data["extracted_text"]
         assert data["checksum"] == expected_checksum
-        assert "id" in data
+        assert "_id" in data
 
     async def test_txt_file_returns_415(self, async_client, pdf_collection):
         response = await async_client.post(
