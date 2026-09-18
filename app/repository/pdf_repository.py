@@ -5,9 +5,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import DuplicateKeyError
 
 from app.core.config import settings
+from app.domain.exceptions import DuplicatePDFError
 from app.domain.pdf_document import PDFDocument
 from app.repository.mappers import domain_to_mongo, mongo_to_domain
-from app.services.ports import DuplicateRecordError
 
 
 class PDFRepository:
@@ -24,8 +24,9 @@ class PDFRepository:
             result = await self._collection.insert_one(domain_to_mongo(document))
             return str(result.inserted_id)
         except DuplicateKeyError as error:
-            raise DuplicateRecordError(
-                "Document with same checksum already exists"
+            # Traducción única: error nativo de Mongo -> excepción de dominio
+            raise DuplicatePDFError(
+                "El documento ya existe en el sistema"
             ) from error
 
     async def find_by_id(self, pdf_id: str) -> PDFDocument | None:

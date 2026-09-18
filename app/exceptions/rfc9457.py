@@ -1,8 +1,13 @@
-"""Implementación de excepciones basadas en RFC 9457 (Problem Details for HTTP APIs)."""
+# FASE GREEN: Implementación mínima para pasar el test
+"""Implementación de excepciones basadas en RFC 9457 (Problem Details for HTTP APIs).
 
+Regla de Oro: cero acoplamiento web. Solo transporta información del problema;
+la conversión a respuestas HTTP es responsabilidad de los exception handlers
+en la capa de API.
+"""
+
+from http import HTTPStatus
 from typing import Any
-
-from fastapi import status
 
 
 class RFC9457Exception(Exception):
@@ -38,13 +43,17 @@ class RFC9457Exception(Exception):
 
 class DuplicatePDFException(RFC9457Exception):
 
-    def __init__(self, detail: str = "El documento ya existe en el sistema") -> None:
+    def __init__(
+        self,
+        detail: str = "El documento ya existe en el sistema",
+        instance: str = "/upload-pdf",
+    ) -> None:
         super().__init__(
             type_="urn:pdf-extractext:errors:duplicate-pdf",
             title="Documento PDF duplicado",
-            status=status.HTTP_409_CONFLICT,
+            status=HTTPStatus.CONFLICT,
             detail=detail,
-            instance="/upload-pdf",
+            instance=instance,
         )
 
 
@@ -58,7 +67,7 @@ class InvalidObjectIdException(RFC9457Exception):
         super().__init__(
             type_="urn:pdf-extractext:errors:invalid-object-id",
             title="ObjectId malformado",
-            status=status.HTTP_400_BAD_REQUEST,
+            status=HTTPStatus.BAD_REQUEST,
             detail=detail,
             instance=instance,
         )

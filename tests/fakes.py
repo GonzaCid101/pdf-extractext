@@ -1,7 +1,8 @@
 """Implementaciones falsas (in-memory) para tests de servicios.
 """
 
-from app.services.ports import DuplicateRecordError
+# FASE RED: Este test fallará inicialmente
+from app.domain.exceptions import DuplicatePDFError
 
 
 class FakePDFRepository:
@@ -13,7 +14,7 @@ class FakePDFRepository:
         if any(
             doc["checksum"] == document["checksum"] for doc in self._documents.values()
         ):
-            raise DuplicateRecordError("Document with same checksum already exists")
+            raise DuplicatePDFError("Document with same checksum already exists")
         new_id = f"fake-id-{len(self._documents) + 1}"
         self._documents[new_id] = document
         return new_id

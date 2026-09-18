@@ -1,9 +1,21 @@
 """Tests para excepciones basadas en RFC 9457."""
 
+import inspect
+
 import pytest
-from fastapi import HTTPException, status
+from http import HTTPStatus as status
 
 from app.exceptions.rfc9457 import RFC9457Exception, DuplicatePDFException
+
+
+# FASE RED: Este test fallará inicialmente
+def test_rfc9457_sin_dependencias_web():
+    """Regla de Oro: el módulo no puede importar fastapi ni starlette."""
+    import app.exceptions.rfc9457 as module
+
+    source = inspect.getsource(module)
+    assert "fastapi" not in source
+    assert "starlette" not in source
 
 
 class TestRFC9457Exception:
@@ -11,7 +23,7 @@ class TestRFC9457Exception:
         exc = RFC9457Exception(
             type_="about:blank",
             title="Error de validación",
-            status=status.HTTP_400_BAD_REQUEST,
+            status=status.BAD_REQUEST,
             detail="El campo 'email' es requerido",
             instance="/upload-pdf",
         )
@@ -25,7 +37,7 @@ class TestRFC9457Exception:
         exc = RFC9457Exception(
             type_="about:blank",
             title="Error de validación",
-            status=status.HTTP_400_BAD_REQUEST,
+            status=status.BAD_REQUEST,
             detail="El campo 'email' es requerido",
             instance="/upload-pdf",
         )
@@ -42,7 +54,7 @@ class TestRFC9457Exception:
         exc = RFC9457Exception(
             type_="about:blank",
             title="Error de validación",
-            status=status.HTTP_400_BAD_REQUEST,
+            status=status.BAD_REQUEST,
             detail="El campo 'email' es requerido",
             instance="/upload-pdf",
             custom_field="valor personalizado",
@@ -56,7 +68,7 @@ class TestDuplicatePDFException:
         exc = DuplicatePDFException()
         assert exc.type == "urn:pdf-extractext:errors:duplicate-pdf"
         assert exc.title == "Documento PDF duplicado"
-        assert exc.status == status.HTTP_409_CONFLICT
+        assert exc.status == status.CONFLICT
         assert exc.detail == "El documento ya existe en el sistema"
         assert exc.instance == "/upload-pdf"
 

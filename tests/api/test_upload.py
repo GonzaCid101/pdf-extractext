@@ -29,6 +29,7 @@ class TestUploadPDF:
     async def test_upload_duplicate_pdf_returns_409(
         self, async_client, pdf_collection, pdf_bytes
     ):
+        """Sub-issue #43: contrato RFC 9457 para documentos duplicados."""
         checksum = hashlib.sha256(pdf_bytes).hexdigest()
 
         await pdf_collection.insert_one(
@@ -44,8 +45,18 @@ class TestUploadPDF:
             files={"file": ("duplicate.pdf", BytesIO(pdf_bytes), "application/pdf")},
         )
 
+        # 1. Código de estado HTTP 409 Conflict
         assert response.status_code == 409
-        assert "detail" in response.json()
+
+        # 2. Content-Type exacto según RFC 9457
+        assert response.headers["Content-Type"].startswith("application/problem+json")
+
+        # 3. Estructura Problem Details (RFC 9457)
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:duplicate-pdf"
+        assert problem["title"] == "Documento PDF duplicado"
+        assert problem["status"] == 409
+        assert problem["detail"] == "El documento ya existe en el sistema"
 
     async def test_valid_pdf_returns_201_with_extracted_data(
         self, async_client, pdf_collection, pdf_bytes, pdf_text_content

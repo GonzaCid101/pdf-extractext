@@ -2,10 +2,11 @@
 
 import pytest
 
+# FASE RED: Este test fallará inicialmente
+from app.domain.exceptions import DuplicatePDFError, PDFNotFoundError
 from app.domain.pdf_document import PDFDocument
 from app.services.checksum import ChecksumService
-from app.services.pdf_service import PDFNotFoundError, PDFService
-from app.services.ports import DuplicateRecordError
+from app.services.pdf_service import PDFService
 
 
 class InMemoryPDFRepository:
@@ -18,7 +19,7 @@ class InMemoryPDFRepository:
     async def save(self, document: PDFDocument) -> str:
         # Emula el índice único de checksum en MongoDB
         if any(d.checksum == document.checksum for d in self._docs.values()):
-            raise DuplicateRecordError("Document with same checksum already exists")
+            raise DuplicatePDFError("Document with same checksum already exists")
         self._counter += 1
         new_id = f"fake-id-{self._counter}"
         document.id = new_id
