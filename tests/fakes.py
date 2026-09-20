@@ -1,20 +1,25 @@
-"""Implementaciones falsas (in-memory) para tests de servicios.
-"""
+"""Implementaciones falsas (in-memory) para tests de servicios."""
 
-# FASE RED: Este test fallará inicialmente
+import hashlib
+
 from app.domain.exceptions import DuplicatePDFError
+from app.domain.pdf_document import PDFDocument
 
 
 class FakePDFRepository:
 
     def __init__(self) -> None:
-        self._documents: dict[str, dict] = {}
+        self._documents: dict[str, PDFDocument] = {}
 
-    async def save(self, document: dict) -> str:
-        if any(
-            doc["checksum"] == document["checksum"] for doc in self._documents.values()
-        ):
+    async def save(self, document: PDFDocument) -> str:
+        if any(doc.checksum == document.checksum for doc in self._documents.values()):
             raise DuplicatePDFError("Document with same checksum already exists")
-        new_id = f"fake-id-{len(self._documents) + 1}"
-        self._documents[new_id] = document
-        return new_id
+        document.id = (
+            f"fake-{hashlib.sha256(document.checksum.encode()).hexdigest()[:12]}"
+        )
+        self._documents[document.id] = document
+        return document.id
+
+    # Métodos de apoyo para verificaciones en tests
+    def saved_documents(self) -> list[PDFDocument]:
+        return list(self._documents.values())
