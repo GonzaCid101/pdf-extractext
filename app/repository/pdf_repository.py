@@ -25,9 +25,7 @@ class PDFRepository:
             return str(result.inserted_id)
         except DuplicateKeyError as error:
             # Traducción única: error nativo de Mongo -> excepción de dominio
-            raise DuplicatePDFError(
-                "El documento ya existe en el sistema"
-            ) from error
+            raise DuplicatePDFError("El documento ya existe en el sistema") from error
 
     async def find_by_id(self, pdf_id: str) -> PDFDocument | None:
         mongo_doc = await self._collection.find_one({"_id": ObjectId(pdf_id)})
@@ -43,8 +41,9 @@ class PDFRepository:
         result = await self._collection.delete_one({"_id": ObjectId(pdf_id)})
         return result.deleted_count > 0
 
-    async def get_all(self) -> list[PDFDocument]:
+    async def get_all(self, skip: int = 0, limit: int = 50) -> list[PDFDocument]:
         documents = []
-        async for mongo_doc in self._collection.find():
+        cursor = self._collection.find().skip(skip).limit(limit)
+        async for mongo_doc in cursor:
             documents.append(mongo_to_domain(mongo_doc))
         return documents

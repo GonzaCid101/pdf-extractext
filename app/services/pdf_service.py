@@ -9,7 +9,12 @@ from app.domain.pdf_document import PDFDocument
 from app.services.checksum import ChecksumService
 from app.services.ports import PDFRepositoryPort
 
-__all__ = ["DuplicatePDFError", "PDFNotFoundError", "FilenameTooLongError", "PDFService"]
+__all__ = [
+    "DuplicatePDFError",
+    "PDFNotFoundError",
+    "FilenameTooLongError",
+    "PDFService",
+]
 
 
 class FilenameTooLongError(ValueError):
@@ -58,8 +63,8 @@ class PDFService:
 
         return document
 
-    async def get_all(self) -> list[PDFDocument]:
-        return await self._repository.get_all()
+    async def get_all(self, skip: int = 0, limit: int = 50) -> list[PDFDocument]:
+        return await self._repository.get_all(skip=skip, limit=limit)
 
     async def get_by_id(self, pdf_id: str) -> PDFDocument:
         document = await self._repository.find_by_id(pdf_id)
