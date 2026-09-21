@@ -29,8 +29,8 @@ class InMemoryPDFRepository:
     async def find_by_id(self, pdf_id: str) -> PDFDocument | None:
         return self._docs.get(pdf_id)
 
-    async def get_all(self) -> list[PDFDocument]:
-        return list(self._docs.values())
+    async def get_all(self, skip: int = 0, limit: int = 50) -> list[PDFDocument]:
+        return list(self._docs.values())[skip : skip + limit]
 
     async def update(self, pdf_id: str, update_data: dict) -> bool:
         doc = self._docs.get(pdf_id)
@@ -61,7 +61,6 @@ async def _seed(service: PDFService, filename: str = "doc.pdf") -> PDFDocument:
 
 
 class TestGetAll:
-
     async def test_returns_empty_list_when_no_documents(self):
         service = _build_service()
 
@@ -81,7 +80,6 @@ class TestGetAll:
 
 
 class TestGetById:
-
     async def test_returns_document_when_exists(self):
         service = _build_service()
         saved = await _seed(service)
@@ -99,7 +97,6 @@ class TestGetById:
 
 
 class TestUpdateFilename:
-
     async def test_updates_filename_and_returns_document(self):
         service = _build_service()
         saved = await _seed(service)
@@ -126,7 +123,6 @@ class TestUpdateFilename:
 
 
 class TestDelete:
-
     async def test_removes_document(self):
         service = _build_service()
         saved = await _seed(service)

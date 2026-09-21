@@ -4,7 +4,6 @@ from bson import ObjectId
 
 
 class TestGetPDFs:
-
     async def test_get_all_pdfs(self, async_client, pdf_collection):
         pdf_document = {
             "filename": "test_document.pdf",
@@ -85,7 +84,6 @@ class TestPatchPDF:
 
 
 class TestDeletePDF:
-
     async def test_delete_pdf_removes_document_successfully(
         self, async_client, pdf_collection
     ):
@@ -112,12 +110,10 @@ class TestDeletePDF:
         assert response.status_code == 404
         assert "detail" in response.json()
 
-class TestInvalidObjectId:
-    """Issue #94: IDs malformados deben devolver 400 con RFC 9457, nunca 500."""
 
-    async def test_get_pdf_with_malformed_id_does_not_raise_500(
-        self, async_client
-    ):
+class TestInvalidObjectId:
+
+    async def test_get_pdf_with_malformed_id_does_not_raise_500(self, async_client):
         response = await async_client.get("/pdfs/abc")
 
         assert response.status_code != 500
@@ -130,10 +126,61 @@ class TestInvalidObjectId:
     async def test_malformed_id_returns_rfc9457_problem_json(self, async_client):
         response = await async_client.get("/pdfs/abc")
 
-        assert response.headers["content-type"].startswith(
-            "application/problem+json"
-        )
+        assert response.headers["content-type"].startswith("application/problem+json")
         problem = response.json()
         assert problem["status"] == 400
         for field in ("type", "title", "detail", "instance"):
             assert field in problem
+
+
+class TestPagination:
+
+    async def _seed_documents(self, pdf_collection, count: int) -> None:
+        documents = [
+            {
+                "filename": f"documento_{i}.pdf",
+                "extracted_text": f"Texto {i}",
+                "checksum": f"checksum-{i:03d}",
+            }
+            for i in range(count)
+        ]
+        await pdf_collection.insert_many(documents)
+
+    async def test_without_params_applies_default_behavior(
+        self, async_client, pdf_collection
+    ):
+        await self._seed_documents(pdf_collection, 5)
+
+        response = await async_client.get("/pdfs")
+
+        assert response.status_code == 200
+        assert len(response.json()) == 5
+
+    async def test_limit_restricts_results(self, async_client, pdf_collection):
+        await self._seed_documents(pdf_collection, 5)
+
+        response = await async_client.get("/pdfs", params={"limit": 3})
+
+        assert response.status_code == 200
+        assert len(response.json()) == 3
+
+    async def test_skip_offsets_results(self, async_client, pdf_collection):
+        await self._seed_documents(pdf_collection, 5)
+
+        response = await async_client.get("/pdfs", params={"skip": 3})
+
+        assert response.status_code == 200
+        assert len(response.json()) == 2
+
+    async def test_limit_above_maximum_returns_400_problem_json(
+        self, async_client, pdf_collection
+    ):
+        response = await async_client.get("/pdfs", params={"limit": 101})
+
+        assert response.status_code == 400
+        assert response.headers["content-type"].startswith("application/problem+json")
+
+    async def test_invalid_params_return_422(self, async_client, pdf_collection):
+        for params in ({"limit": 0}, {"limit": -5}, {"skip": -1}):
+            response = await async_client.get("/pdfs", params=params)
+            assert response.status_code == 422
