@@ -2,11 +2,12 @@
 
 import re
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.dependencies import get_pdf_service
+from app.core.config import settings
 from app.domain.pdf_document import PDFDocument
-from app.exceptions.rfc9457 import InvalidObjectIdException
+from app.exceptions.rfc9457 import InvalidObjectIdException, PageLimitExceededException
 from app.models.pdf_models import PDFDocumentResponse, PDFUpdateRequest
 from app.services.pdf_service import PDFNotFoundError, PDFService
 
@@ -32,9 +33,18 @@ def _validate_object_id(pdf_id: str) -> None:
 
 @router.get("/pdfs", response_model=list[PDFDocumentResponse])
 async def get_all_pdfs(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(
+        None,
+        ge=1,
+        description="Máximo de resultados (default: configuración)",
+    ),
     service: PDFService = Depends(get_pdf_service),
 ):
-    documents = await service.get_all()
+    if limit is not None and limit > settings.MAX_PAGE_SIZE:
+        raise PageLimitExceededException(limit=limit, max_limit=settings.MAX_PAGE_SIZE)
+    effective_limit = limit if limit is not None else settings.DEFAULT_PAGE_SIZE
+    documents = await service.get_all(skip=skip, limit=effective_limit)
     return [_to_response(doc) for doc in documents]
 
 

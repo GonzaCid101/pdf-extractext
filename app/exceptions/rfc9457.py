@@ -1,17 +1,10 @@
-# FASE GREEN: Implementación mínima para pasar el test
-"""Implementación de excepciones basadas en RFC 9457 (Problem Details for HTTP APIs).
-
-Regla de Oro: cero acoplamiento web. Solo transporta información del problema;
-la conversión a respuestas HTTP es responsabilidad de los exception handlers
-en la capa de API.
-"""
+"""Implementación de excepciones basadas en RFC 9457 (Problem Details for HTTP APIs)."""
 
 from http import HTTPStatus
 from typing import Any
 
 
 class RFC9457Exception(Exception):
-
     def __init__(
         self,
         *,
@@ -42,7 +35,6 @@ class RFC9457Exception(Exception):
 
 
 class DuplicatePDFException(RFC9457Exception):
-
     def __init__(
         self,
         detail: str = "El documento ya existe en el sistema",
@@ -58,7 +50,6 @@ class DuplicatePDFException(RFC9457Exception):
 
 
 class InvalidObjectIdException(RFC9457Exception):
-
     def __init__(
         self,
         instance: str,
@@ -70,4 +61,18 @@ class InvalidObjectIdException(RFC9457Exception):
             status=HTTPStatus.BAD_REQUEST,
             detail=detail,
             instance=instance,
+        )
+
+
+class PageLimitExceededException(RFC9457Exception):
+    def __init__(self, limit: int, max_limit: int) -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:page-limit-exceeded",
+            title="Límite de paginación excedido",
+            status=HTTPStatus.BAD_REQUEST,
+            detail=(
+                f"El límite solicitado ({limit}) supera el máximo "
+                f"permitido ({max_limit})"
+            ),
+            instance="/pdfs",
         )
