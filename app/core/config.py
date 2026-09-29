@@ -24,5 +24,9 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE_MB: int = 50
     ALLOWED_FILE_EXTENSION: str = ".pdf"
 
+    # Paginación
+    DEFAULT_PAGE_SIZE: int = 50
+    MAX_PAGE_SIZE: int = 100
+
 
 settings = Settings()

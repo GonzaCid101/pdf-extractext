@@ -5,16 +5,12 @@ from typing import Protocol
 from app.domain.pdf_document import PDFDocument
 
 
-class DuplicateRecordError(Exception):
-    pass
-
-
 class PDFRepositoryPort(Protocol):
     async def save(self, document: PDFDocument) -> str: ...
 
     async def find_by_id(self, pdf_id: str) -> PDFDocument | None: ...
 
-    async def get_all(self) -> list[PDFDocument]: ...
+    async def get_all(self, skip: int = 0, limit: int = 50) -> list[PDFDocument]: ...
 
     async def update(self, pdf_id: str, update_data: dict) -> bool: ...
 
