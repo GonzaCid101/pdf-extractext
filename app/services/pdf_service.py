@@ -1,9 +1,8 @@
 """Servicio de extracción y procesamiento de PDFs."""
 
-import fitz
+import asyncio
 
-# FASE GREEN: Implementación mínima para pasar el test
-# Las excepciones de dominio se importan; el servicio solo las deja fluir.
+import fitz
 from app.domain.exceptions import DuplicatePDFError, PDFNotFoundError
 from app.domain.pdf_document import PDFDocument
 from app.services.checksum import ChecksumService
@@ -43,22 +42,34 @@ class PDFService:
             raise ValueError(f"Contenido PDF inválido: {error}") from error
         return extracted_text
 
-    async def process_and_save(self, filename: str, pdf_content: bytes) -> PDFDocument:
-        # FASE GREEN: Implementación mínima para pasar el test
+    async def process_and_save(
+        self, filename: str, pdf_content: bytes, checksum: str | None = None
+    ) -> PDFDocument:
         if len(filename) > MAX_FILENAME_LENGTH:
             raise FilenameTooLongError(
                 f"El nombre del archivo excede los {MAX_FILENAME_LENGTH} caracteres"
             )
 
+        # Deduplicación temprana: si el checksum ya existe, evitamos la
+        # extracción de texto, que es la parte costosa del pipeline.
+        if checksum is None:
+            checksum = await asyncio.to_thread(
+                self._checksum_service.generate, pdf_content
+            )
+        if await self._repository.find_by_checksum(checksum) is not None:
+            raise DuplicatePDFError("El documento ya existe en el sistema")
+
+        # La extracción es CPU-bound: va a un thread pool para no bloquear
+        # el event loop bajo carga concurrente.
+        extracted_text = await asyncio.to_thread(self.extract_text, pdf_content)
+
         document = PDFDocument(
             id="",
             filename=filename,
-            extracted_text=self.extract_text(pdf_content),
-            checksum=self._checksum_service.generate(pdf_content),
+            extracted_text=extracted_text,
+            checksum=checksum,
         )
 
-        # El repositorio traduce los errores nativos de Mongo a excepciones
-        # de dominio; el servicio no re-traduce, solo deja fluir (KISS).
         document.id = await self._repository.save(document)
 
         return document
