@@ -1,4 +1,3 @@
-# FASE GREEN: Implementación mínima para pasar el test
 """Excepciones puras de dominio/aplicación.
 
 Regla de Oro: cero acoplamiento con la capa web (fastapi/starlette).

@@ -25,10 +25,8 @@ class MongoManager:
             self._client = None
 
 
-_db_manager = MongoManager()
+mongo_manager = MongoManager()
 
 
 async def get_database() -> AsyncGenerator[AsyncIOMotorClient, None]:
-    client = _db_manager.get_client()
-    yield client
-    
+    yield mongo_manager.get_client()

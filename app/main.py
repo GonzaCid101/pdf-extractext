@@ -13,25 +13,27 @@ from app.core.middleware import TracingMiddleware
 from app.domain.exceptions import DuplicatePDFError
 from app.exceptions.rfc9457 import DuplicatePDFException, RFC9457Exception
 
-from app.repository.database import get_database
+from app.repository.database import mongo_manager
 from app.repository.pdf_repository import PDFRepository
 
 setup_logging()
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async for db in get_database():
-        repo = PDFRepository(db)
-        await repo.setup_indexes()
-        break
-    
+    client = mongo_manager.get_client()
+    repo = PDFRepository(client)
+    await repo.setup_indexes()
+
     yield
-    
-    pass
+
+    await mongo_manager.close()
+
 
 app = FastAPI(title=settings.APP_TITLE, lifespan=lifespan)
 
 app.add_middleware(TracingMiddleware)
+
 
 @app.exception_handler(RFC9457Exception)
 async def rfc9457_exception_handler(request: Request, exc: RFC9457Exception):
@@ -42,7 +44,6 @@ async def rfc9457_exception_handler(request: Request, exc: RFC9457Exception):
     )
 
 
-# FASE GREEN: Implementación mínima para pasar el test (Sub-issue #43)
 # Traducción única en la capa API: excepción pura de dominio -> RFC 9457.
 @app.exception_handler(DuplicatePDFError)
 async def duplicate_pdf_error_handler(request: Request, exc: DuplicatePDFError):
