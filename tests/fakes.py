@@ -7,7 +7,6 @@ from app.domain.pdf_document import PDFDocument
 
 
 class FakePDFRepository:
-
     def __init__(self) -> None:
         self._documents: dict[str, PDFDocument] = {}
 
@@ -19,6 +18,12 @@ class FakePDFRepository:
         )
         self._documents[document.id] = document
         return document.id
+
+    async def find_by_checksum(self, checksum: str) -> PDFDocument | None:
+        return next(
+            (doc for doc in self._documents.values() if doc.checksum == checksum),
+            None,
+        )
 
     # Métodos de apoyo para verificaciones en tests
     def saved_documents(self) -> list[PDFDocument]:

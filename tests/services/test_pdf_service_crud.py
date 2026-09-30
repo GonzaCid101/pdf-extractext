@@ -29,6 +29,12 @@ class InMemoryPDFRepository:
     async def find_by_id(self, pdf_id: str) -> PDFDocument | None:
         return self._docs.get(pdf_id)
 
+    async def find_by_checksum(self, checksum: str) -> PDFDocument | None:
+        return next(
+            (d for d in self._docs.values() if d.checksum == checksum),
+            None,
+        )
+
     async def get_all(self, skip: int = 0, limit: int = 50) -> list[PDFDocument]:
         return list(self._docs.values())[skip : skip + limit]
 

@@ -17,12 +17,12 @@ class InMemoryPDFRepository:
         self.saved.append(document)
         return "65f1a2b3c4d5e6f7a8b9c0d1"
 
+    async def find_by_checksum(self, checksum: str) -> PDFDocument | None:
+        return None
+
 
 class TestFilenameValidation:
-
     async def test_rejects_filename_longer_than_100_chars(self, pdf_bytes):
-        # FASE RED: Este test fallará inicialmente
-        # (FilenameTooLongError no existe hasta la Fase GREEN)
         service = PDFService(InMemoryPDFRepository(), ChecksumService())
         long_filename = "a" * (MAX_FILENAME_LENGTH + 1) + ".pdf"
 
