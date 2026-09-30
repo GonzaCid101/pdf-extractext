@@ -1,12 +1,7 @@
-"""Issue #70: verificación a nivel HTTP del handler RFC 9457 de main.py.
-
-# FASE RED: Este test falla si el handler no serializa con el media type
-# application/problem+json o si la estructura de la respuesta está incompleta.
-"""
+"""Verificación a nivel HTTP del handler RFC 9457 de main.py."""
 
 
 class TestRFC9457HttpHandler:
-    """El handler rfc9457_exception_handler debe devolver Problem Details."""
 
     async def test_handler_returns_problem_json_media_type(self, async_client):
         response = await async_client.get("/pdfs/abc")
