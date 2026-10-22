@@ -65,7 +65,9 @@ app.include_router(pdfs_router)
 
 
 def run() -> None:
-    uvicorn.run("app.main:app", host=settings.APP_HOST, port=settings.APP_PORT, workers=4)
+    uvicorn.run(
+        "app.main:app", host=settings.APP_HOST, port=settings.APP_PORT, workers=4
+    )
 
 
 if __name__ == "__main__":
