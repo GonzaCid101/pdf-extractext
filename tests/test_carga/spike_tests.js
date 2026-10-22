@@ -15,7 +15,7 @@ export const options = {
     ],
 };
 
-const BASE_URL = 'https://pdf-extractext.universidad.localhost';
+const BASE_URL = 'http://localhost:8000';
 
 // Carga de PDFs en modo binario durante la inicialización (init context de k6)
 const pdfFiles = [
