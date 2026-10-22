@@ -1,6 +1,7 @@
 services:
   pdf-extractext:
     image: pdf-extractext:${APP_VERSION:-1.0.0}
+    container_name: pdf-extractext
     environment:
       - TZ=America/Argentina/Mendoza
     build:
@@ -8,16 +9,14 @@ services:
       dockerfile: infra/Dockerfile
     env_file:
       - ../.env
+    ports:
+      - "8000:8000"
     networks:
       - pdfnet
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.pdf-extractext.rule: "Host(`pdf-extractext.universidad.localhost`)"
-      traefik.http.routers.pdf-extractext.tls: "true"
-      traefik.http.routers.pdf-extractext.entrypoints: "https"
-      traefik.http.services.pdf-extractext.loadbalancer.server.port: "8000"
+    depends_on:
+      db:
+        condition: service_healthy
 
 networks:
   pdfnet:
-    external: true
-    name: red_compartida_pdf
+    driver: bridge

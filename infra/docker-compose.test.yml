@@ -5,3 +5,9 @@ services:
     volumes:
       - ../tests:/app/tests
       - ../pyproject.toml:/app/pyproject.toml
+    networks:
+      - pdfnet
+
+networks:
+  pdfnet:
+    driver: bridge
