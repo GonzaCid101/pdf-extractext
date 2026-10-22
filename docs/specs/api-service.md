@@ -3,20 +3,20 @@
 > Contrato público del sistema. Independiente de implementación.
 > Rol: orquestador (B1) y frontera pública. Traduce los errores internos al contrato público; nunca expone detalles internos.
 > Trazabilidad: Alignment §4, §5.2 (flujo), §6.1–6.6, y comportamiento ACTUAL del monolito (`app/api/endpoints/upload.py`, `pdfs.py`).
-> Conserva la funcionalidad pública actual; los únicos cambios contractuales deliberados son R2 y R3 (415→422 en los casos indicados).
+> Conserva la funcionalidad pública actual; los únicos cambios contractuales deliberados son R2, R3 (415→422 en los casos indicados) y el nombre del campo identificador (`_id` → `id`).
 
 ## Representación pública del documento
 
 ```json
 {
-  "_id": "65797e91c185b4c7c5a93a1b",
+  "id": "65797e91c185b4c7c5a93a1b",
   "filename": "documento.pdf",
   "extracted_text": "texto...",
   "checksum": "9f86d081..."
 }
 ```
 
-Conserva los campos del contrato actual del monolito (incluido el nombre `_id` en las respuestas). **Congelado:** el ID v1 es ObjectId hex de 24 caracteres; Persistence usa `id` y **API transforma `id` → `_id`** en el borde público (compatibilidad de clientes y corte Strangler sin fricción), ver `common.md` §4. No se exponen simultáneamente `id` y `_id`. Correlación: `X-Request-ID` presente en respuestas y propagado internamente.
+Conserva los campos del contrato actual del monolito. **Congelado:** el ID v1 es ObjectId hex de 24 caracteres y el campo identificador del contrato público es **`id`**; el nombre `_id` es un detalle de MongoDB y no traspasa a la frontera pública, ver `common.md` §4. No se exponen simultáneamente `id` y `_id`. Correlación: `X-Request-ID` presente en respuestas y propagado internamente.
 
 ---
 

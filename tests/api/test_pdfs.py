@@ -19,7 +19,8 @@ class TestGetPDFs:
         data = response.json()
         assert isinstance(data, list)
         assert len(data) == 1
-        assert data[0]["_id"] == inserted_id
+        assert data[0]["id"] == inserted_id
+        assert "_id" not in data[0]
         assert data[0]["filename"] == "test_document.pdf"
 
     async def test_get_pdf_by_id(self, async_client, pdf_collection):
@@ -36,7 +37,7 @@ class TestGetPDFs:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["_id"] == str(specific_id)
+        assert data["id"] == str(specific_id)
         assert data["filename"] == "specific_document.pdf"
 
     async def test_get_pdf_not_found(self, async_client, pdf_collection):

@@ -46,10 +46,10 @@ API **no tiene otras dependencias de servicio**. Extraction y Persistence no se 
 3. **Validación de entrada en el borde (fail-fast):** extensión/media type, tamaño, archivo vacío, longitud del filename, formato de ID recibido.
 4. **Cliente de Extraction:** enviar el PDF por `multipart/form-data` y recibir `{filename, extracted_text, checksum}`.
 5. **Cliente de Persistence:** operar el CRUD JSON de `/documents`.
-6. **Transformación de modelos:** `id` (Persistence) → `_id` (público), nunca ambos.
+6. **Representación del documento público:** `id` (mismo nombre que Persistence); el nombre `_id` de MongoDB no traspasa al borde público.
 7. **Traducción de errores:** de envelope interno `{code, message}` + status → contrato público, sin exponer detalles internos.
 8. **Retry ante respuesta perdida** (`POST /documents`): resolución del 409 con documento existente → 201 al cliente (§8).
-9. **Preservar la funcionalidad pública actual** del monolito, con los únicos cambios contractuales aprobados: 422 para filename largo (R2) y para PDF no procesable (R3).
+9. **Preservar la funcionalidad pública actual** del monolito, con los únicos cambios contractuales aprobados: 422 para filename largo (R2), 422 para PDF no procesable (R3) y el campo identificador público `id` (antes `_id`).
 10. **Observabilidad mínima:** propagar `X-Request-ID` en toda la cadena; logging coherente con la práctica actual del monolito.
 
 ---
@@ -102,7 +102,7 @@ API SERVICE
   │                                (garantiza unicidad de checksum)
   │  ◀──── 201 documento (id)  |  409 + documento existente
   ▼
-Cliente ◀── 201 documento público (campo `_id`)
+Cliente ◀── 201 documento público (campo `id`)
 ```
 
 Decisiones congeladas que rigen el flujo:
@@ -147,8 +147,8 @@ Comportamiento contractual de API:
 
 ## 9. Transformaciones de datos
 
-- **Identificación:** `Persistence.id` → **público `_id`** (transformación en API). No se exponen nunca ambos. Sin lógica adicional: renombrado de campo al serializar.
-- **Documento público:** `_id`, `filename`, `extracted_text`, `checksum` (mismos campos que el contrato actual del monolito).
+- **Identificación:** `Persistence.id` → **público `id`**. No hay renombrado: `_id` es un detalle de MongoDB y no traspasa al borde público.
+- **Documento público:** `id`, `filename`, `extracted_text`, `checksum`.
 - **Upload:** el `filename` y los bytes entran por multipart y se reenvían a Extraction sin alteración; la respuesta de Extraction alimenta `POST /documents` sin re-procesamiento.
 - **PATCH público:** acepta `{filename}`; valida y reenvía a Persistence. Campos desconocidos → 422 (comportamiento actual con `extra="forbid"`).
 - **Correlación:** propagar `X-Request-ID` recibido; si no viene, generarlo (como hace el middleware actual del monolito).
@@ -165,7 +165,7 @@ Enumeración funcional (cada una será Issue/Subissue posterior; sin asignar per
 4. **Cliente HTTP hacia Persistence** (CRUD, envelope de error, código de catálogo).
 5. **Cliente HTTP hacia Extraction** (multipart, envelope de error).
 6. **Orquestación del upload** (endpoint `POST /upload-pdf` validaciones + cadena Extraction → Persistence).
-7. **Transformación de modelos** (`id`→`_id`, mapeo de documento público).
+7. **Mapeo del documento público** (dominio → `id`, sin renombrado de campo).
 8. **Traducción de errores** (tabla `status+code` → público, envelope interno, formato público).
 9. **Retry y resolución de 409** (§8).
 10. **Validaciones de borde** (extensión, tamaño, vacío, filename, formato de ID, campos del PATCH).

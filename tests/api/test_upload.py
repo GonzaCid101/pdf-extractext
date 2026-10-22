@@ -17,13 +17,14 @@ class TestUploadPDF:
 
         assert response.status_code == 201
         data = response.json()
-        assert "_id" in data
+        assert "id" in data
+        assert "_id" not in data
         assert data["filename"] == "new_document.pdf"
 
-        get_response = await async_client.get(f"/pdfs/{data['_id']}")
+        get_response = await async_client.get(f"/pdfs/{data['id']}")
         assert get_response.status_code == 200
         persisted = get_response.json()
-        assert persisted["_id"] == data["_id"]
+        assert persisted["id"] == data["id"]
         assert persisted["checksum"] == data["checksum"]
 
     async def test_upload_duplicate_pdf_returns_409(
@@ -74,7 +75,7 @@ class TestUploadPDF:
         for expected_fragment in pdf_text_content:
             assert expected_fragment in data["extracted_text"]
         assert data["checksum"] == expected_checksum
-        assert "_id" in data
+        assert "id" in data
 
     async def test_txt_file_returns_415(self, async_client, pdf_collection):
         response = await async_client.post(

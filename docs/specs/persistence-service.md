@@ -10,7 +10,7 @@ Exponer el CRUD de documentos y garantizar los invariantes del dato:
 
 1. **Unicidad del checksum:** jamás existen dos documentos con el mismo checksum. Es una garantía contractual; el mecanismo interno (p. ej. índice único) es detalle de implementación.
 2. **Invariantes del dato:** valida lo que persiste (longitud de filename) aunque el consumidor ya lo haya validado.
-3. **Generación del ID:** cada documento recibe un identificador al crearse. **Formato v1 CONGELADO:** ObjectId hexadecimal de 24 caracteres (`common.md` §4). Nombre de campo contractual de este servicio: **`id`** (API lo transforma a `_id` en el contrato público).
+3. **Generación del ID:** cada documento recibe un identificador al crearse. **Formato v1 CONGELADO:** ObjectId hexadecimal de 24 caracteres (`common.md` §4). Nombre de campo contractual de este servicio: **`id`** (mismo nombre en el contrato público; `_id` no traspasa a la API).
 
 **No hace (contractual):** no recibe ni procesa el PDF binario (recibe solo JSON), no extrae texto, no inicia llamadas a otros servicios.
 

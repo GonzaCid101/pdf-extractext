@@ -67,10 +67,10 @@ Formato RFC 9457 (`application/problem+json`) sigue **PENDIENTE** de aprobación
 
 - **Formato v1:** ObjectId hexadecimal de 24 caracteres (heredado del monolito).
 - **Quién genera:** Persistence, al persistir el documento.
-- **Nombres de campo por contrato (diferencia deliberada, no es discrepancia):**
+- **Nombres de campo por contrato:**
   - **Persistence usa `id`** en sus responses (modelo interno).
-  - **API expone `_id`** en el contrato público, por compatibilidad con el monolito y para no modificar clientes durante el corte Strangler.
-  - **API realiza la transformación `id` (Persistence) → `_id` (público)**. No se exponen simultáneamente `id` y `_id`.
+  - **API expone `id`** en el contrato público: `_id` es un detalle de MongoDB y no traspasa a la frontera pública.
+  - **No hay transformación de nombre**: la cadena es MongoDB → mapper del repository → entidad de dominio → service → mapper de API → `id` (público). Nunca se exponen `id` y `_id` simultáneamente.
 - El formato público a largo plazo (ObjectId vs formato neutral) sigue POSTERGADO; v1 = ObjectId.
 
 ## 4.1 Semántica del 409 por checksum duplicado — CONGELADO

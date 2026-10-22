@@ -14,12 +14,12 @@ class TestIntegrationFlow:
 
         assert response_upload.status_code == 201
         data = response_upload.json()
-        pdf_id = data["_id"]
+        pdf_id = data["id"]
         assert data["filename"] == "lifecycle.pdf"
 
         response_get = await async_client.get(f"/pdfs/{pdf_id}")
         assert response_get.status_code == 200
-        assert response_get.json()["_id"] == pdf_id
+        assert response_get.json()["id"] == pdf_id
 
         response_update = await async_client.patch(
             f"/pdfs/{pdf_id}",

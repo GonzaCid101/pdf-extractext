@@ -90,8 +90,8 @@ Documento persistido (vista contractual):
 | `checksum` | SHA-256 hex lowercase 64 (`common.md` §1); **único** en toda la colección |
 
 Reglas de frontera de identificación:
-- **Persistence usa `id`; nunca expone `_id`** como campo contractual.
-- **API transforma `id` → `_id`** para el público. `id` y `_id` no coexisten en el contrato interno.
+- **Persistence usa `id`** como campo contractual; `_id` es un detalle de MongoDB.
+- **El contrato público usa `id`**: no hay renombrado entre Persistence y la frontera pública.
 - `created_at` / `updated_at`: **no se introducen en v1** (pendientes del Alignment, no bloqueantes).
 
 ## 6. Persistencia y MongoDB
@@ -204,7 +204,7 @@ Extraction ↛ MongoDB
 
 | Servicio | Condición de integración |
 |---|---|
-| **API** | Único consumidor. La entrada de creación es directamente compatible con la salida de Extraction (`{filename, extracted_text, checksum}` — mismos nombres de campo). Persistence responde con `id` interno; API transforma a `_id`. Debe tolerar el catálogo completo de códigos |
+| **API** | Único consumidor. La entrada de creación es directamente compatible con la salida de Extraction (`{filename, extracted_text, checksum}` — mismos nombres de campo). Persistence responde con `id`, que es también el nombre del campo público. Debe tolerar el catálogo completo de códigos |
 | **Extraction** | Ninguna relación. No importar nada suyo, no conocer su contrato |
 | **Infrastructure** | Mongo accesible solo desde la red de Persistence; readiness futuro dependerá de la conectividad con Mongo; volumen de datos gestionado por Infra (hoy `infra/mongodata/` contiene datos versionados — riesgo documentado en Alignment §9) |
 
@@ -243,7 +243,7 @@ No hay decisiones nuevas; no hay pendientes bloqueantes.
 
 - [x] Ownership exclusivo de MongoDB claramente establecido (§1, §6, §12).
 - [x] Contrato CRUD alineado con `persistence-service.md` sin copiarlo (§4).
-- [x] `id` contractual interno diferenciado de `_id` público; transformación ubicada en API (§5).
+- [x] `id` contractual sin `_id` en ninguna frontera pública; la frontera de representación vive en API (§5).
 - [x] Checksum calculado fuera (Extraction) y unicidad garantizada dentro (§3, §6, §7).
 - [x] `409 DUPLICATE_CHECKSUM` define cuerpo con documento existente completo (§7).
 - [x] No existe `/exists` ni lookup por checksum (§7, §11).
