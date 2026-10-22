@@ -25,10 +25,10 @@ async def lifespan(app: FastAPI):
     client = mongo_manager.get_client()
     repo = PDFRepository(client)
     await repo.setup_indexes()
-
-    yield
-
-    await mongo_manager.close()
+    try:
+        yield
+    finally:
+        await mongo_manager.close()
 
 
 app = FastAPI(title=settings.APP_TITLE, lifespan=lifespan)
