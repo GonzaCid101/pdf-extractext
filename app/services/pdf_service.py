@@ -38,8 +38,8 @@ class PDFService:
             with fitz.open(stream=pdf_content, filetype="pdf") as pdf_document:
                 for page in pdf_document:
                     extracted_text += page.get_text()
-        except Exception as error:
-            raise ValueError(f"Contenido PDF inválido: {error}") from error
+        except Exception:
+            raise ValueError("Contenido PDF inválido") from None
         return extracted_text
 
     async def process_and_save(
