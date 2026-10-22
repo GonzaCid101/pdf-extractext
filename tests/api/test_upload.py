@@ -83,6 +83,11 @@ class TestUploadPDF:
         )
 
         assert response.status_code == 415
+        assert response.headers["Content-Type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:invalid-file-extension"
+        assert problem["status"] == 415
+        assert problem["detail"] == "Solo se permiten archivos PDF"
 
     async def test_empty_pdf_returns_400(self, async_client, pdf_collection):
         response = await async_client.post(
@@ -91,3 +96,53 @@ class TestUploadPDF:
         )
 
         assert response.status_code == 400
+        assert response.headers["Content-Type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:empty-file"
+        assert problem["status"] == 400
+        assert problem["detail"] == "El archivo está vacío"
+
+    async def test_file_over_limit_returns_413(self, async_client, pdf_collection):
+        oversized_bytes = b"%PDF" + b"A" * (51 * 1024 * 1024)
+
+        response = await async_client.post(
+            "/upload-pdf",
+            files={"file": ("heavy.pdf", BytesIO(oversized_bytes), "application/pdf")},
+        )
+
+        assert response.status_code == 413
+        assert response.headers["Content-Type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:file-too-large"
+        assert problem["status"] == 413
+        assert problem["detail"] == "El archivo supera el límite máximo de 50 MB"
+
+    async def test_non_pdf_content_returns_415(self, async_client, pdf_collection):
+        response = await async_client.post(
+            "/upload-pdf",
+            files={"file": ("fake.pdf", b"Este no es un pdf", "application/pdf")},
+        )
+
+        assert response.status_code == 415
+        assert response.headers["Content-Type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:invalid-pdf-content"
+        assert problem["status"] == 415
+        assert "Contenido PDF inválido" in problem["detail"]
+
+    async def test_filename_too_long_returns_415(
+        self, async_client, pdf_collection, pdf_bytes
+    ):
+        long_filename = "a" * 101 + ".pdf"
+
+        response = await async_client.post(
+            "/upload-pdf",
+            files={"file": (long_filename, BytesIO(pdf_bytes), "application/pdf")},
+        )
+
+        assert response.status_code == 415
+        assert response.headers["Content-Type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:filename-too-long"
+        assert problem["status"] == 415
+        assert problem["detail"] == "El nombre del archivo excede los 100 caracteres"

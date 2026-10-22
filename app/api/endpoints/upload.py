@@ -1,10 +1,24 @@
-import hashlib
+"""Adapter HTTP de la subida de PDFs."""
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from app.api.dependencies import get_pdf_service
-from app.core.config import settings
+from fastapi import APIRouter, Depends, File, UploadFile, status
+
+from app.api.dependencies import get_pdf_service, get_upload_policy
+from app.api.upload_reader import read_upload
+from app.exceptions.rfc9457 import (
+    EmptyFileException,
+    FilenameTooLongException,
+    FileTooLargeException,
+    InvalidFileExtensionException,
+    InvalidPDFContentException,
+)
 from app.models.pdf_models import PDFDocumentResponse
-from app.services.pdf_service import PDFService
+from app.services.pdf_service import FilenameTooLongError, PDFService
+from app.services.upload_policy import (
+    EmptyFileError,
+    FileTooLargeError,
+    InvalidFileExtensionError,
+    UploadPolicy,
+)
 
 router = APIRouter()
 
@@ -17,53 +31,29 @@ router = APIRouter()
 async def upload_pdf(
     file: UploadFile = File(...),
     service: PDFService = Depends(get_pdf_service),
+    policy: UploadPolicy = Depends(get_upload_policy),
 ) -> PDFDocumentResponse:
-    if not file.filename or not file.filename.lower().endswith(
-        settings.ALLOWED_FILE_EXTENSION
-    ):
-        raise HTTPException(status_code=415, detail="Solo se permiten archivos PDF")
-
-    max_size_bytes = settings.MAX_FILE_SIZE_MB * 1024 * 1024
-
-    if file.size is not None and file.size > max_size_bytes:
-        raise HTTPException(
-            status_code=413,
-            detail=f"El archivo supera el límite máximo de {settings.MAX_FILE_SIZE_MB} MB",
-        )
-
-    real_size = 0
-    pdf_bytes_array = bytearray()
-    hasher = hashlib.sha256()
-
-    while chunk := await file.read(1024 * 1024):
-        real_size += len(chunk)
-        if real_size > max_size_bytes:
-            raise HTTPException(
-                status_code=413,
-                detail=f"El archivo supera el límite máximo de {settings.MAX_FILE_SIZE_MB} MB",
-            )
-        hasher.update(chunk)
-        pdf_bytes_array.extend(chunk)
-
-    pdf_bytes = bytes(pdf_bytes_array)
-
-    if len(pdf_bytes) == 0:
-        raise HTTPException(status_code=400, detail="El archivo está vacío")
-
     try:
-        # Checksum calculado durante el streaming: evita una segunda lectura.
-        result = await service.process_and_save(
-            file.filename, pdf_bytes, checksum=hasher.hexdigest()
+        policy.validate_extension(file.filename)
+        content, checksum = await read_upload(file, policy)
+        policy.validate_not_empty(len(content))
+        document = await service.process_and_save(
+            file.filename, content, checksum=checksum
         )
+    except InvalidFileExtensionError as error:
+        raise InvalidFileExtensionException(detail=str(error)) from error
+    except FileTooLargeError as error:
+        raise FileTooLargeException(detail=str(error)) from error
+    except EmptyFileError as error:
+        raise EmptyFileException(detail=str(error)) from error
+    except FilenameTooLongError as error:
+        raise FilenameTooLongException(detail=str(error)) from error
     except ValueError as error:
-        raise HTTPException(
-            status_code=415,
-            detail=str(error),
-        ) from error
+        raise InvalidPDFContentException(detail=str(error)) from error
 
     return PDFDocumentResponse(
-        id=result.id,
-        filename=result.filename,
-        extracted_text=result.extracted_text,
-        checksum=result.checksum,
+        id=document.id,
+        filename=document.filename,
+        extracted_text=document.extracted_text,
+        checksum=document.checksum,
     )

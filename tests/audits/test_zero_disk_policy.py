@@ -15,6 +15,7 @@ from app.main import app
 _APP_MODULES = [
     "app.api.endpoints.upload",
     "app.api.endpoints.pdfs",
+    "app.api.upload_reader",
     "app.services.pdf_service",
 ]
 

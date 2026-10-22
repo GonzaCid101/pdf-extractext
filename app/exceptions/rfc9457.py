@@ -76,3 +76,58 @@ class PageLimitExceededException(RFC9457Exception):
             ),
             instance="/pdfs",
         )
+
+
+class InvalidFileExtensionException(RFC9457Exception):
+    def __init__(self, detail: str, instance: str = "/upload-pdf") -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:invalid-file-extension",
+            title="Extensión de archivo no permitida",
+            status=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail=detail,
+            instance=instance,
+        )
+
+
+class FileTooLargeException(RFC9457Exception):
+    def __init__(self, detail: str, instance: str = "/upload-pdf") -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:file-too-large",
+            title="Archivo demasiado grande",
+            status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+            detail=detail,
+            instance=instance,
+        )
+
+
+class EmptyFileException(RFC9457Exception):
+    def __init__(self, detail: str, instance: str = "/upload-pdf") -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:empty-file",
+            title="Archivo vacío",
+            status=HTTPStatus.BAD_REQUEST,
+            detail=detail,
+            instance=instance,
+        )
+
+
+class InvalidPDFContentException(RFC9457Exception):
+    def __init__(self, detail: str, instance: str = "/upload-pdf") -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:invalid-pdf-content",
+            title="Contenido PDF inválido",
+            status=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail=detail,
+            instance=instance,
+        )
+
+
+class FilenameTooLongException(RFC9457Exception):
+    def __init__(self, detail: str, instance: str = "/upload-pdf") -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:filename-too-long",
+            title="Nombre de archivo demasiado largo",
+            status=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail=detail,
+            instance=instance,
+        )

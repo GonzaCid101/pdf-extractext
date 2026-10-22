@@ -5,7 +5,15 @@ import inspect
 import pytest
 from http import HTTPStatus as status
 
-from app.exceptions.rfc9457 import RFC9457Exception, DuplicatePDFException
+from app.exceptions.rfc9457 import (
+    RFC9457Exception,
+    DuplicatePDFException,
+    EmptyFileException,
+    FilenameTooLongException,
+    FileTooLargeException,
+    InvalidFileExtensionException,
+    InvalidPDFContentException,
+)
 
 
 # FASE RED: Este test fallará inicialmente
@@ -80,3 +88,55 @@ class TestDuplicatePDFException:
         """Verifica que hereda de RFC9457Exception"""
         exc = DuplicatePDFException()
         assert isinstance(exc, RFC9457Exception)
+
+
+_UPLOAD_PROBLEMS = [
+    (
+        InvalidFileExtensionException,
+        "urn:pdf-extractext:errors:invalid-file-extension",
+        "Extensión de archivo no permitida",
+        status.UNSUPPORTED_MEDIA_TYPE,
+    ),
+    (
+        FileTooLargeException,
+        "urn:pdf-extractext:errors:file-too-large",
+        "Archivo demasiado grande",
+        status.REQUEST_ENTITY_TOO_LARGE,
+    ),
+    (
+        EmptyFileException,
+        "urn:pdf-extractext:errors:empty-file",
+        "Archivo vacío",
+        status.BAD_REQUEST,
+    ),
+    (
+        InvalidPDFContentException,
+        "urn:pdf-extractext:errors:invalid-pdf-content",
+        "Contenido PDF inválido",
+        status.UNSUPPORTED_MEDIA_TYPE,
+    ),
+    (
+        FilenameTooLongException,
+        "urn:pdf-extractext:errors:filename-too-long",
+        "Nombre de archivo demasiado largo",
+        status.UNSUPPORTED_MEDIA_TYPE,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "problem_class, expected_type, expected_title, expected_status",
+    _UPLOAD_PROBLEMS,
+    ids=[case[0].__name__ for case in _UPLOAD_PROBLEMS],
+)
+def test_problemas_de_upload_cumplen_rfc9457(
+    problem_class, expected_type, expected_title, expected_status
+):
+    exc = problem_class(detail="detalle del problema")
+
+    assert isinstance(exc, RFC9457Exception)
+    assert exc.type == expected_type
+    assert exc.title == expected_title
+    assert exc.status == expected_status
+    assert exc.detail == "detalle del problema"
+    assert exc.instance == "/upload-pdf"

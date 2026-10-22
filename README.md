@@ -106,6 +106,9 @@ Configuración centralizada en `app/core/config.py` usando **pydantic-settings**
 | `PATCH` | `/pdfs/{id}` | Actualizar metadatos (filename) |
 | `DELETE` | `/pdfs/{id}` | Eliminar un PDF de la base de datos |
 
+Los errores de `POST /upload-pdf` responden con Problem Details (RFC 9457) en
+`application/problem+json`.
+
 
 ## Arquitectura
 
@@ -120,14 +123,16 @@ pdf-extractext
 │   ├── api/
 │   │   ├── health.py              # Router de health check
 │   │   ├── dependencies.py        # Dependencias inyectables
+│   │   ├── upload_reader.py       # Lectura técnica del archivo en chunks
 │   │   └── endpoints/
-│   │       ├── upload.py          # Endpoint de subida de PDFs
+│   │       ├── upload.py          # Adapter HTTP de subida de PDFs
 │   │       └── pdfs.py            # Endpoints CRUD de PDFs
 │   ├── models/
 │   │   └── pdf_models.py          # Esquemas Pydantic
 │   ├── services/
 │   │   ├── checksum.py            # Cálculo de checksums SHA-256
-│   │   └── pdf_service.py         # Lógica de extracción de texto
+│   │   ├── pdf_service.py         # Lógica de extracción de texto
+│   │   └── upload_policy.py       # Reglas de validación del archivo subido
 │   ├── repository/
 │   │   ├── database.py            # Conexión a MongoDB
 │   │   └── pdf_repository.py      # Operaciones CRUD

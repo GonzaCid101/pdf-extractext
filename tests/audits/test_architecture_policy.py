@@ -172,3 +172,42 @@ def test_regla_5_objectid_solo_en_repository(source_file: Path) -> None:
         "bson/ObjectId solo puede vivir en app/repository/; "
         "los tipos de la base de datos no deben filtrarse hacia afuera."
     )
+
+
+_UPLOAD_ENDPOINT = APP_ROOT / "api" / "endpoints" / "upload.py"
+
+_UPLOAD_POLICY_MODULE = "app.services.upload_policy"
+
+
+def test_regla_6_endpoint_upload_delega_las_reglas_en_la_politica() -> None:
+    """El endpoint de upload no implementa reglas de negocio: las delega en la política."""
+    tree = _parse_ast(_UPLOAD_ENDPOINT)
+
+    imported = _get_imported_modules(tree)
+    assert _UPLOAD_POLICY_MODULE in imported, (
+        "REGLA 6 violada en upload.py: la extensión, el tamaño máximo y el "
+        "archivo vacío son reglas de negocio y deben delegarse en UploadPolicy "
+        f"({_UPLOAD_POLICY_MODULE})."
+    )
+
+    attribute_calls = {
+        node.func.attr
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    }
+    assert not attribute_calls & {"endswith", "startswith"}, (
+        "REGLA 6 violada en upload.py: la comprobación de la extensión es una "
+        "regla de negocio y debe vivir en la política."
+    )
+
+    numeric_comparisons = {
+        comparator.value
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Compare)
+        for comparator in node.comparators
+        if isinstance(comparator, ast.Constant) and isinstance(comparator.value, int)
+    }
+    assert not numeric_comparisons, (
+        "REGLA 6 violada en upload.py: la comparación de tamaños es una regla de "
+        "negocio y debe vivir en la política."
+    )
