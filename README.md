@@ -18,13 +18,12 @@ API REST para extraer texto de archivos PDF y almacenarlos en MongoDB. Permite s
 - **Generación de checksums SHA-256** para verificación de integridad
 - **Almacenamiento en MongoDB** con Motor (driver asíncrono)
 - **API REST con FastAPI** y documentación automática Swagger UI
-- **Proxy Inverso y Enrutamiento** gestionado a través de Traefik.
 - **Arquitectura en capas con núcleo de dominio y puertos/adaptadores**
 - **Configuración centralizada** mediante variables de entorno
 
 ## Tecnologias
 
-Python 3.14.0 | FastAPI | Pydantic | PyMuPDF | Motor | MongoDB | Docker | Pytest | Traefik
+Python 3.14.0 | FastAPI | Pydantic | PyMuPDF | Motor | MongoDB | Docker | Pytest
 
 ## Requisitos
 
@@ -36,16 +35,8 @@ Python 3.14.0 | FastAPI | Pydantic | PyMuPDF | Motor | MongoDB | Docker | Pytest
 
 ## Instalación y Configuración
 
-El proyecto utiliza un enfoque de infraestructura desacoplada. La aplicación funciona detrás de un proxy inverso (Traefik) que gestiona las peticiones y los certificados.
+### Opción 1: Todo con Docker (recomendado)
 
-# Paso 1: Levantar la Infraestructura Base (Traefik)
-Dado que Traefik actúa como un API Gateway global para nuestros microservicios, debe iniciarse primero.
-1. Dirígete a la carpeta externa donde se encuentra configurado Traefik.
-2. Levanta el servicio (esto creará la red compartida que nuestra API necesita):
-   ```bash
-   docker compose up -d
-# Paso 2: Despliegue de la API
-Una vez que la red compartida existe, levantamos nuestro proyecto:
 ```bash
 # 1. Clonar el repositorio
 git clone <https://github.com/GonzaCid101/pdf-extractext>
@@ -57,21 +48,51 @@ cp .env.example .env
 # 3. Construir la imagen de la API
 make build
 
-# 4. Levantar la infraestructura (Base de Datos + API)
+# 4. Levantar DB + API
 make up
 ```
 La API estará disponible en:
-- **API:** https://api.universidad.localhost
-- **Documentación interactiva:** https://api.universidad.localhost/docs
-    #Acceso directo ejecutando: make docs
+- **API:** http://localhost:8000
+- **Documentación interactiva:** http://localhost:8000/docs
+
+### Opción 2: MongoDB en Docker + app local con uv
+
+```bash
+# 1. Clonar el repositorio
+git clone <https://github.com/GonzaCid101/pdf-extractext>
+cd pdf-extractext
+
+# 2. Configurar variables de entorno
+cp .env.example .env
+# Cambiar MONGO_URI a mongodb://localhost:27017/ en .env
+
+# 3. Levantar solo MongoDB (puerto 27017 expuesto)
+make db-up
+
+# 4. Instalar dependencias y ejecutar
+uv sync
+uv run python -m app.main
+```
+La API estará disponible en:
+- **API:** http://localhost:8000
+- **Documentación interactiva:** http://localhost:8000/docs
 
 * Comandos Útiles (Makefile)
-``` bash
-#Encender o apagar solo la base de datos
-make db-up / make db-down
+```bash
+# Levantar DB + API
+make up
+
+# Levantar solo la base de datos
+make db-up
 
 # Detener contenedores
 make down
+
+# Detener solo la base de datos
+make db-down
+
+# Abrir docs en el navegador
+make docs
 ```
 Validamos el flujo completo de los documentos y escenarios extraordinarios (archivos corruptos, formatos inválidos, payloads pesados).
 Para correr la suite completa de tests en un entorno Docker aislado:
@@ -125,7 +146,7 @@ Domain (entidad + excepciones puras)
 ↑
 Repository (adaptador MongoDB) + Mappers (MongoDB ↔ Dominio / Dominio ↔ DTO)
 ↓
-Infrastructure (FastAPI, Motor/MongoDB, configuración, Traefik)
+Infrastructure (FastAPI, Motor/MongoDB, configuración)
 ```
 
 ### Estructura del proyecto
