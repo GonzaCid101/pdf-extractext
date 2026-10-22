@@ -1,6 +1,8 @@
 """Entry point de la aplicación FastAPI."""
 
 from contextlib import asynccontextmanager
+
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
@@ -12,7 +14,6 @@ from app.core.logger import setup_logging
 from app.core.middleware import TracingMiddleware
 from app.domain.exceptions import DuplicatePDFError
 from app.exceptions.rfc9457 import DuplicatePDFException, RFC9457Exception
-
 from app.repository.database import mongo_manager
 from app.repository.pdf_repository import PDFRepository
 
@@ -61,3 +62,11 @@ async def duplicate_pdf_error_handler(request: Request, exc: DuplicatePDFError):
 app.include_router(health_router)
 app.include_router(upload_router)
 app.include_router(pdfs_router)
+
+
+def run() -> None:
+    uvicorn.run("app.main:app", host=settings.APP_HOST, port=settings.APP_PORT, workers=4)
+
+
+if __name__ == "__main__":
+    run()
