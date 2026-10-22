@@ -62,6 +62,7 @@ docs/
 *.db
 *.sqlite3
 *.dump
+infra/mongodata/
 
 # Archivos innecesarios para la imagen final
 .opencode/
