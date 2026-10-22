@@ -5,8 +5,8 @@ import re
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.dependencies import get_pdf_service
+from app.api.mappers import to_pdf_document_response
 from app.core.config import settings
-from app.domain.pdf_document import PDFDocument
 from app.exceptions.rfc9457 import InvalidObjectIdException, PageLimitExceededException
 from app.models.pdf_models import PDFDocumentResponse, PDFUpdateRequest
 from app.services.pdf_service import PDFNotFoundError, PDFService
@@ -14,16 +14,6 @@ from app.services.pdf_service import PDFNotFoundError, PDFService
 router = APIRouter()
 
 _OBJECT_ID_PATTERN = re.compile(r"^[0-9a-fA-F]{24}$")
-
-
-def _to_response(document: PDFDocument) -> PDFDocumentResponse:
-    """Mapeo explícito de entidad de dominio a DTO de respuesta."""
-    return PDFDocumentResponse(
-        id=document.id,
-        filename=document.filename,
-        extracted_text=document.extracted_text,
-        checksum=document.checksum,
-    )
 
 
 def _validate_object_id(pdf_id: str) -> None:
@@ -45,7 +35,7 @@ async def get_all_pdfs(
         raise PageLimitExceededException(limit=limit, max_limit=settings.MAX_PAGE_SIZE)
     effective_limit = limit if limit is not None else settings.DEFAULT_PAGE_SIZE
     documents = await service.get_all(skip=skip, limit=effective_limit)
-    return [_to_response(doc) for doc in documents]
+    return [to_pdf_document_response(doc) for doc in documents]
 
 
 @router.get("/pdfs/{pdf_id}", response_model=PDFDocumentResponse)
@@ -58,7 +48,7 @@ async def get_pdf_by_id(
         document = await service.get_by_id(pdf_id)
     except PDFNotFoundError:
         raise HTTPException(status_code=404, detail="PDF no encontrado")
-    return _to_response(document)
+    return to_pdf_document_response(document)
 
 
 @router.patch("/pdfs/{pdf_id}", response_model=PDFDocumentResponse)
@@ -77,7 +67,7 @@ async def patch_pdf(
         document = await service.update_filename(pdf_id, update_data.filename)
     except PDFNotFoundError:
         raise HTTPException(status_code=404, detail="PDF no encontrado")
-    return _to_response(document)
+    return to_pdf_document_response(document)
 
 
 @router.delete("/pdfs/{pdf_id}", status_code=status.HTTP_204_NO_CONTENT)

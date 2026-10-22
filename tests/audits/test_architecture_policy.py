@@ -211,3 +211,29 @@ def test_regla_6_endpoint_upload_delega_las_reglas_en_la_politica() -> None:
         "REGLA 6 violada en upload.py: la comparación de tamaños es una regla de "
         "negocio y debe vivir en la política."
     )
+
+
+@pytest.mark.parametrize(
+    "source_file",
+    _py_files("api/endpoints"),
+    ids=lambda p: str(p.relative_to(APP_ROOT)),
+)
+def test_regla_7_los_endpoints_delegan_la_construction_del_dto(
+    source_file: Path,
+) -> None:
+    """Los endpoints no construyen el DTO de respuesta: delegan en el mapper de la API."""
+    tree = _parse_ast(source_file)
+
+    constructions = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "PDFDocumentResponse"
+    ]
+
+    assert not constructions, (
+        f"REGLA 7 violada en {source_file.name}: construye PDFDocumentResponse "
+        "en el endpoint. La conversión dominio → DTO está centralizada en "
+        "app/api/mappers.py (to_pdf_document_response)."
+    )

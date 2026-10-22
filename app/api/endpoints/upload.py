@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from app.api.dependencies import get_pdf_service, get_upload_policy
+from app.api.mappers import to_pdf_document_response
 from app.api.upload_reader import read_upload
 from app.exceptions.rfc9457 import (
     EmptyFileException,
@@ -51,9 +52,4 @@ async def upload_pdf(
     except ValueError as error:
         raise InvalidPDFContentException(detail=str(error)) from error
 
-    return PDFDocumentResponse(
-        id=document.id,
-        filename=document.filename,
-        extracted_text=document.extracted_text,
-        checksum=document.checksum,
-    )
+    return to_pdf_document_response(document)
