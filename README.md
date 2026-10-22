@@ -114,6 +114,8 @@ Configuración centralizada en `app/core/config.py` usando **pydantic-settings**
 | `APP_PORT` | No | `8000` | Puerto de escucha de Uvicorn |
 | `MAX_FILE_SIZE_MB` | No | `50` | Tamaño máximo de archivo (MB) |
 | `ALLOWED_FILE_EXTENSION` | No | `.pdf` | Extensión de archivo permitida |
+| `DEFAULT_PAGE_SIZE` | No | `50` | Tamaño por defecto de paginación |
+| `MAX_PAGE_SIZE` | No | `100` | Tamaño máximo de paginación |
 
 
 ## Endpoints de la API
