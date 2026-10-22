@@ -8,17 +8,18 @@ from app.repository.database import get_database
 from app.repository.pdf_repository import PDFRepository
 from app.services.checksum import ChecksumService
 from app.services.pdf_service import PDFService
+from app.services.ports import PDFRepositoryPort
 from app.services.upload_policy import UploadPolicy
 
 
 async def get_pdf_repository(
     client: AsyncIOMotorClient = Depends(get_database),
-) -> PDFRepository:
+) -> PDFRepositoryPort:
     return PDFRepository(client)
 
 
 async def get_pdf_service(
-    repository: PDFRepository = Depends(get_pdf_repository),
+    repository: PDFRepositoryPort = Depends(get_pdf_repository),
 ) -> PDFService:
     return PDFService(repository, ChecksumService())
 
