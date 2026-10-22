@@ -1,6 +1,7 @@
 """Entry point de la aplicación FastAPI."""
 
 from contextlib import asynccontextmanager
+import logging
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -18,6 +19,7 @@ from app.repository.database import mongo_manager
 from app.repository.pdf_repository import PDFRepository
 
 setup_logging()
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -55,6 +57,22 @@ async def duplicate_pdf_error_handler(request: Request, exc: DuplicatePDFError):
     return JSONResponse(
         status_code=problem.status,
         content=problem.to_dict(),
+        media_type="application/problem+json",
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    logger.exception("Error interno no controlado")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "type": "about:blank",
+            "title": "Error interno del servidor",
+            "status": 500,
+            "detail": "Error interno del servidor",
+            "instance": str(request.url.path),
+        },
         media_type="application/problem+json",
     )
 
