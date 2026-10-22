@@ -67,9 +67,5 @@ def test_upload_pdf_zero_disk_policy(
             f"Llamadas: {mock_obj.call_args_list}"
         )
 
-    # La petición debe tener éxito (o fallar opcionalmente con 400/415) pero nunca tocar el disco
-    assert (
-        response.status_code == 201
-        or response.status_code == 400
-        or response.status_code == 415
-    )
+    # El PDF válido del fixture debe procesarse correctamente sin escribir en disco
+    assert response.status_code == 201
