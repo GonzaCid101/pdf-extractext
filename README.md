@@ -89,8 +89,8 @@ Configuración centralizada en `app/core/config.py` usando **pydantic-settings**
 | `MONGO_DATABASE_NAME` | No | `pdf_db` | Nombre de la base de datos |
 | `MONGO_COLLECTION_NAME` | No | `pdfs` | Nombre de la colección |
 | `APP_TITLE` | No | `Proyecto Convertidor - API Conversor PDF` | Título de la app |
-| `APP_HOST` | No | `0.0.0.0` | Host del servidor |
-| `APP_PORT` | No | `8000` | Puerto del servidor |
+| `APP_HOST` | No | `0.0.0.0` | Host de escucha de Uvicorn |
+| `APP_PORT` | No | `8000` | Puerto de escucha de Uvicorn |
 | `MAX_FILE_SIZE_MB` | No | `50` | Tamaño máximo de archivo (MB) |
 | `ALLOWED_FILE_EXTENSION` | No | `.pdf` | Extensión de archivo permitida |
 
