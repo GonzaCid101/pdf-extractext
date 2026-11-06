@@ -175,7 +175,6 @@ pdf-extractext
 │   ├── services/                # Casos de uso / lógica de aplicación
 │   │   ├── ports.py             # Puertos (PDFRepositoryPort) para inversión de dependencias
 │   │   ├── pdf_service.py       # Casos de uso de documentos PDF
-│   │   ├── checksum.py          # Cálculo de checksums SHA-256
 │   │   └── upload_policy.py     # Reglas de validación del archivo subido
 │   ├── repository/              # Adaptador de persistencia (MongoDB)
 │   │   ├── database.py          # Conexión a MongoDB
@@ -192,7 +191,7 @@ pdf-extractext
 │   └── Dockerfile               # Multi-stage build de la aplicación
 ├── tests/
 │   ├── api/                     # Tests de endpoints
-│   ├── audits/                  # Auditoría arquitectónica (AST)
+│   ├── audits/                  # Policy Tests (arquitectura + zero-disk)
 │   ├── core/                    # Tests de configuración
 │   ├── domain/                  # Tests de dominio
 │   ├── exceptions/              # Tests de manejo de errores
