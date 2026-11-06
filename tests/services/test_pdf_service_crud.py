@@ -5,7 +5,6 @@ import pytest
 # FASE RED: Este test fallará inicialmente
 from app.domain.exceptions import DuplicatePDFError, PDFNotFoundError
 from app.domain.pdf_document import PDFDocument
-from app.services.checksum import ChecksumService
 from app.services.pdf_service import PDFService
 
 
@@ -51,7 +50,7 @@ class InMemoryPDFRepository:
 
 
 def _build_service() -> PDFService:
-    return PDFService(InMemoryPDFRepository(), ChecksumService())
+    return PDFService(InMemoryPDFRepository())
 
 
 async def _seed(service: PDFService, filename: str = "doc.pdf") -> PDFDocument:

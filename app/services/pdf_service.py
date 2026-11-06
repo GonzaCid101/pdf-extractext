@@ -5,7 +5,6 @@ import asyncio
 import fitz
 from app.domain.exceptions import DuplicatePDFError, PDFNotFoundError
 from app.domain.pdf_document import PDFDocument
-from app.services.checksum import ChecksumService
 from app.services.ports import PDFRepositoryPort
 
 __all__ = [
@@ -24,13 +23,8 @@ MAX_FILENAME_LENGTH = 100
 
 
 class PDFService:
-    def __init__(
-        self,
-        repository: PDFRepositoryPort,
-        checksum_service: ChecksumService | None = None,
-    ) -> None:
+    def __init__(self, repository: PDFRepositoryPort) -> None:
         self._repository = repository
-        self._checksum_service = checksum_service or ChecksumService()
 
     def extract_text(self, pdf_content: bytes) -> str:
         extracted_text = ""
@@ -43,7 +37,7 @@ class PDFService:
         return extracted_text
 
     async def process_and_save(
-        self, filename: str, pdf_content: bytes, checksum: str | None = None
+        self, filename: str, pdf_content: bytes, checksum: str
     ) -> PDFDocument:
         if len(filename) > MAX_FILENAME_LENGTH:
             raise FilenameTooLongError(
@@ -52,10 +46,6 @@ class PDFService:
 
         # Deduplicación temprana: si el checksum ya existe, evitamos la
         # extracción de texto, que es la parte costosa del pipeline.
-        if checksum is None:
-            checksum = await asyncio.to_thread(
-                self._checksum_service.generate, pdf_content
-            )
         if await self._repository.find_by_checksum(checksum) is not None:
             raise DuplicatePDFError("El documento ya existe en el sistema")
 

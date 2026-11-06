@@ -3,10 +3,10 @@
 import pytest
 
 from app.domain.pdf_document import PDFDocument
-from app.services.checksum import ChecksumService
 from app.services.pdf_service import FilenameTooLongError, PDFService
 
 MAX_FILENAME_LENGTH = 100
+CHECKSUM = "0" * 64
 
 
 class InMemoryPDFRepository:
@@ -23,16 +23,16 @@ class InMemoryPDFRepository:
 
 class TestFilenameValidation:
     async def test_rejects_filename_longer_than_100_chars(self, pdf_bytes):
-        service = PDFService(InMemoryPDFRepository(), ChecksumService())
+        service = PDFService(InMemoryPDFRepository())
         long_filename = "a" * (MAX_FILENAME_LENGTH + 1) + ".pdf"
 
         with pytest.raises(FilenameTooLongError):
-            await service.process_and_save(long_filename, pdf_bytes)
+            await service.process_and_save(long_filename, pdf_bytes, CHECKSUM)
 
     async def test_accepts_filename_of_exactly_100_chars(self, pdf_bytes):
-        service = PDFService(InMemoryPDFRepository(), ChecksumService())
+        service = PDFService(InMemoryPDFRepository())
         filename = "a" * (MAX_FILENAME_LENGTH - 4) + ".pdf"
 
-        document = await service.process_and_save(filename, pdf_bytes)
+        document = await service.process_and_save(filename, pdf_bytes, CHECKSUM)
 
         assert document.filename == filename
