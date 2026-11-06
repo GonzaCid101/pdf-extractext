@@ -38,13 +38,17 @@ app = FastAPI(title=settings.APP_TITLE, lifespan=lifespan)
 app.add_middleware(TracingMiddleware)
 
 
-@app.exception_handler(RFC9457Exception)
-async def rfc9457_exception_handler(request: Request, exc: RFC9457Exception):
+def _problem_response(problem: RFC9457Exception) -> JSONResponse:
     return JSONResponse(
-        status_code=exc.status,
-        content=exc.to_dict(),
+        status_code=problem.status,
+        content=problem.to_dict(),
         media_type="application/problem+json",
     )
+
+
+@app.exception_handler(RFC9457Exception)
+async def rfc9457_exception_handler(request: Request, exc: RFC9457Exception):
+    return _problem_response(exc)
 
 
 # Traducción única en la capa API: excepción pura de dominio -> RFC 9457.
@@ -54,27 +58,20 @@ async def duplicate_pdf_error_handler(request: Request, exc: DuplicatePDFError):
         detail=str(exc) or "El documento ya existe en el sistema",
         instance=str(request.url.path),
     )
-    return JSONResponse(
-        status_code=problem.status,
-        content=problem.to_dict(),
-        media_type="application/problem+json",
-    )
+    return _problem_response(problem)
 
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
     logger.exception("Error interno no controlado")
-    return JSONResponse(
-        status_code=500,
-        content={
-            "type": "about:blank",
-            "title": "Error interno del servidor",
-            "status": 500,
-            "detail": "Error interno del servidor",
-            "instance": str(request.url.path),
-        },
-        media_type="application/problem+json",
+    problem = RFC9457Exception(
+        type_="about:blank",
+        title="Error interno del servidor",
+        status=500,
+        detail="Error interno del servidor",
+        instance=str(request.url.path),
     )
+    return _problem_response(problem)
 
 
 app.include_router(health_router)
