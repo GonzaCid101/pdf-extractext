@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.models.pdf_models import PDFDocumentResponse
+from app.models.pdf_models import PDFDocumentResponse, PDFUpdateRequest
 
 
 class TestPDFDocumentResponse:
@@ -37,6 +37,19 @@ class TestPDFDocumentResponse:
         assert doc.filename == "doc.pdf"
         assert doc.extracted_text == "contenido"
         assert doc.checksum == "a1b2"
+
+
+class TestPDFUpdateRequest:
+    """Tests para PDFUpdateRequest."""
+
+    def test_rejects_unknown_fields(self):
+        """`extra="forbid"` rechaza campos no permitidos."""
+        with pytest.raises(ValidationError) as error:
+            PDFUpdateRequest(filename="doc.pdf", checksum="abc123")
+
+        assert any(
+            item["type"] == "extra_forbidden" for item in error.value.errors()
+        )
 
 
 class TestPDFDocumentResponseDesacopladoDeMongoDB:
