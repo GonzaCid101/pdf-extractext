@@ -3,54 +3,14 @@
 import pytest
 
 # FASE RED: Este test fallará inicialmente
-from app.domain.exceptions import DuplicatePDFError, PDFNotFoundError
+from app.domain.exceptions import PDFNotFoundError
 from app.domain.pdf_document import PDFDocument
 from app.services.pdf_service import PDFService
-
-
-class InMemoryPDFRepository:
-    """Fake in-memory que implementa el contrato completo del puerto."""
-
-    def __init__(self) -> None:
-        self._docs: dict[str, PDFDocument] = {}
-        self._counter = 0
-
-    async def save(self, document: PDFDocument) -> str:
-        # Emula el índice único de checksum en MongoDB
-        if any(d.checksum == document.checksum for d in self._docs.values()):
-            raise DuplicatePDFError("Document with same checksum already exists")
-        self._counter += 1
-        new_id = f"fake-id-{self._counter}"
-        document.id = new_id
-        self._docs[new_id] = document
-        return new_id
-
-    async def find_by_id(self, pdf_id: str) -> PDFDocument | None:
-        return self._docs.get(pdf_id)
-
-    async def find_by_checksum(self, checksum: str) -> PDFDocument | None:
-        return next(
-            (d for d in self._docs.values() if d.checksum == checksum),
-            None,
-        )
-
-    async def get_all(self, skip: int = 0, limit: int = 50) -> list[PDFDocument]:
-        return list(self._docs.values())[skip : skip + limit]
-
-    async def update(self, pdf_id: str, update_data: dict) -> bool:
-        doc = self._docs.get(pdf_id)
-        if doc is None:
-            return False
-        if "filename" in update_data:
-            doc.filename = update_data["filename"]
-        return True
-
-    async def delete(self, pdf_id: str) -> bool:
-        return self._docs.pop(pdf_id, None) is not None
+from tests.fakes import FakePDFRepository
 
 
 def _build_service() -> PDFService:
-    return PDFService(InMemoryPDFRepository())
+    return PDFService(FakePDFRepository())
 
 
 async def _seed(service: PDFService, filename: str = "doc.pdf") -> PDFDocument:
