@@ -9,10 +9,12 @@ from app.exceptions.rfc9457 import (
     RFC9457Exception,
     DuplicatePDFException,
     EmptyFileException,
+    EmptyUpdateException,
     FilenameTooLongException,
     FileTooLargeException,
     InvalidFileExtensionException,
     InvalidPDFContentException,
+    PDFNotFoundException,
 )
 
 
@@ -140,3 +142,35 @@ def test_problemas_de_upload_cumplen_rfc9457(
     assert exc.status == expected_status
     assert exc.detail == "detalle del problema"
     assert exc.instance == "/upload-pdf"
+
+
+class TestPDFNotFoundException:
+    # FASE RED: Este test fallará inicialmente
+    def test_default_fields(self):
+        exc = PDFNotFoundException(instance="/pdfs/65797e91c185b4c7c5a93a99")
+
+        assert exc.type == "urn:pdf-extractext:errors:pdf-not-found"
+        assert exc.title == "PDF no encontrado"
+        assert exc.status == status.NOT_FOUND
+        assert exc.detail == "PDF no encontrado"
+        assert exc.instance == "/pdfs/65797e91c185b4c7c5a93a99"
+
+    def test_custom_detail(self):
+        exc = PDFNotFoundException(
+            instance="/pdfs/1",
+            detail="PDF con id '1' no encontrado",
+        )
+
+        assert exc.detail == "PDF con id '1' no encontrado"
+
+
+class TestEmptyUpdateException:
+    # FASE RED: Este test fallará inicialmente
+    def test_default_fields(self):
+        exc = EmptyUpdateException(instance="/pdfs/1")
+
+        assert exc.type == "urn:pdf-extractext:errors:empty-update"
+        assert exc.title == "Sin campos para actualizar"
+        assert exc.status == status.BAD_REQUEST
+        assert exc.detail == "No se proporcionó ningún campo para actualizar"
+        assert exc.instance == "/pdfs/1"

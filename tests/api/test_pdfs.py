@@ -45,8 +45,13 @@ class TestGetPDFs:
 
         response = await async_client.get(f"/pdfs/{non_existent_id}")
 
+        # FASE RED: Este test fallará inicialmente
         assert response.status_code == 404
-        assert "detail" in response.json()
+        assert response.headers["content-type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:pdf-not-found"
+        assert problem["instance"] == f"/pdfs/{non_existent_id}"
+        assert "detail" in problem
 
 
 class TestPatchPDF:
@@ -80,8 +85,35 @@ class TestPatchPDF:
             f"/pdfs/{non_existent_id}", json=update_data
         )
 
+        # FASE RED: Este test fallará inicialmente
         assert response.status_code == 404
-        assert "detail" in response.json()
+        assert response.headers["content-type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:pdf-not-found"
+        assert problem["instance"] == f"/pdfs/{non_existent_id}"
+        assert "detail" in problem
+
+    async def test_patch_pdf_empty_body_returns_400_problem_json(
+        self, async_client, pdf_collection
+    ):
+        # FASE RED: Este test fallará inicialmente
+        result = await pdf_collection.insert_one(
+            {
+                "filename": "original.pdf",
+                "extracted_text": "texto",
+                "checksum": "empty-update-checksum",
+            }
+        )
+        pdf_id = str(result.inserted_id)
+
+        response = await async_client.patch(f"/pdfs/{pdf_id}", json={})
+
+        assert response.status_code == 400
+        assert response.headers["content-type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:empty-update"
+        assert problem["instance"] == f"/pdfs/{pdf_id}"
+        assert problem["detail"] == "No se proporcionó ningún campo para actualizar"
 
 
 class TestDeletePDF:
@@ -108,8 +140,13 @@ class TestDeletePDF:
 
         response = await async_client.delete(f"/pdfs/{non_existent_id}")
 
+        # FASE RED: Este test fallará inicialmente
         assert response.status_code == 404
-        assert "detail" in response.json()
+        assert response.headers["content-type"].startswith("application/problem+json")
+        problem = response.json()
+        assert problem["type"] == "urn:pdf-extractext:errors:pdf-not-found"
+        assert problem["instance"] == f"/pdfs/{non_existent_id}"
+        assert "detail" in problem
 
 
 class TestInvalidObjectId:

@@ -13,8 +13,12 @@ from app.api.health import router as health_router
 from app.core.config import settings
 from app.core.logger import setup_logging
 from app.core.middleware import TracingMiddleware
-from app.domain.exceptions import DuplicatePDFError
-from app.exceptions.rfc9457 import DuplicatePDFException, RFC9457Exception
+from app.domain.exceptions import DuplicatePDFError, PDFNotFoundError
+from app.exceptions.rfc9457 import (
+    DuplicatePDFException,
+    PDFNotFoundException,
+    RFC9457Exception,
+)
 from app.repository.database import mongo_manager
 from app.repository.pdf_repository import PDFRepository
 
@@ -54,6 +58,16 @@ async def rfc9457_exception_handler(request: Request, exc: RFC9457Exception):
 async def duplicate_pdf_error_handler(request: Request, exc: DuplicatePDFError):
     problem = DuplicatePDFException(
         detail=str(exc) or "El documento ya existe en el sistema",
+        instance=str(request.url.path),
+    )
+    return _problem_response(problem)
+
+
+# FASE GREEN: Traducción centralizada del 404 de dominio a RFC 9457.
+@app.exception_handler(PDFNotFoundError)
+async def pdf_not_found_error_handler(request: Request, exc: PDFNotFoundError):
+    problem = PDFNotFoundException(
+        detail=str(exc) or "PDF no encontrado",
         instance=str(request.url.path),
     )
     return _problem_response(problem)

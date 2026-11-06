@@ -129,7 +129,7 @@ Configuración centralizada en `app/core/config.py` usando **pydantic-settings**
 | `PATCH` | `/pdfs/{id}` | Actualizar metadatos (filename) |
 | `DELETE` | `/pdfs/{id}` | Eliminar un PDF de la base de datos |
 
-Los errores de `POST /upload-pdf` responden con Problem Details (RFC 9457) en
+Los errores de la API responden con Problem Details (RFC 9457) en
 `application/problem+json`.
 
 
