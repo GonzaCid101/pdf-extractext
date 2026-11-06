@@ -2,14 +2,18 @@
 
 import re
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies import get_pdf_service
 from app.api.mappers import to_pdf_document_response
 from app.core.config import settings
-from app.exceptions.rfc9457 import InvalidObjectIdException, PageLimitExceededException
+from app.exceptions.rfc9457 import (
+    EmptyUpdateException,
+    InvalidObjectIdException,
+    PageLimitExceededException,
+)
 from app.models.pdf_models import PDFDocumentResponse, PDFUpdateRequest
-from app.services.pdf_service import PDFNotFoundError, PDFService
+from app.services.pdf_service import PDFService
 
 router = APIRouter()
 
@@ -44,10 +48,7 @@ async def get_pdf_by_id(
     service: PDFService = Depends(get_pdf_service),
 ):
     _validate_object_id(pdf_id)
-    try:
-        document = await service.get_by_id(pdf_id)
-    except PDFNotFoundError:
-        raise HTTPException(status_code=404, detail="PDF no encontrado")
+    document = await service.get_by_id(pdf_id)
     return to_pdf_document_response(document)
 
 
@@ -59,14 +60,8 @@ async def patch_pdf(
 ):
     _validate_object_id(pdf_id)
     if update_data.filename is None:
-        raise HTTPException(
-            status_code=400,
-            detail="No se proporcionó ningún campo para actualizar",
-        )
-    try:
-        document = await service.update_filename(pdf_id, update_data.filename)
-    except PDFNotFoundError:
-        raise HTTPException(status_code=404, detail="PDF no encontrado")
+        raise EmptyUpdateException(instance=f"/pdfs/{pdf_id}")
+    document = await service.update_filename(pdf_id, update_data.filename)
     return to_pdf_document_response(document)
 
 
@@ -76,8 +71,5 @@ async def delete_pdf(
     service: PDFService = Depends(get_pdf_service),
 ):
     _validate_object_id(pdf_id)
-    try:
-        await service.delete(pdf_id)
-    except PDFNotFoundError:
-        raise HTTPException(status_code=404, detail="PDF no encontrado")
+    await service.delete(pdf_id)
     return None

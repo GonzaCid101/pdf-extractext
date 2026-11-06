@@ -131,3 +131,34 @@ class FilenameTooLongException(RFC9457Exception):
             detail=detail,
             instance=instance,
         )
+
+
+# FASE GREEN: Implementación mínima para pasar los tests del contrato CRUD.
+class PDFNotFoundException(RFC9457Exception):
+    def __init__(
+        self,
+        instance: str,
+        detail: str = "PDF no encontrado",
+    ) -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:pdf-not-found",
+            title="PDF no encontrado",
+            status=HTTPStatus.NOT_FOUND,
+            detail=detail,
+            instance=instance,
+        )
+
+
+class EmptyUpdateException(RFC9457Exception):
+    def __init__(
+        self,
+        instance: str,
+        detail: str = "No se proporcionó ningún campo para actualizar",
+    ) -> None:
+        super().__init__(
+            type_="urn:pdf-extractext:errors:empty-update",
+            title="Sin campos para actualizar",
+            status=HTTPStatus.BAD_REQUEST,
+            detail=detail,
+            instance=instance,
+        )
