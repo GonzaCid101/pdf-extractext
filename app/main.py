@@ -23,11 +23,9 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    client = mongo_manager.get_client()
-    repo = PDFRepository(client)
-    await repo.setup_indexes()
+async def lifespan(_app: FastAPI):
     try:
+        await PDFRepository(mongo_manager.get_client()).setup_indexes()
         yield
     finally:
         await mongo_manager.close()
