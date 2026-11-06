@@ -28,5 +28,5 @@ class PDFUser(HttpUser):
         if response.status_code == 200:
             data = response.json()
             if data and isinstance(data, list) and len(data) > 0:
-                pdf_id = random.choice(data)["_id"]
+                pdf_id = random.choice(data)["id"]
                 self.client.get(f"/pdfs/{pdf_id}")
