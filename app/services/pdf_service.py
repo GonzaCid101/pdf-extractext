@@ -80,7 +80,5 @@ class PDFService:
         return document
 
     async def delete(self, pdf_id: str) -> None:
-        document = await self._repository.find_by_id(pdf_id)
-        if document is None:
-            raise PDFNotFoundError(f"PDF con id '{pdf_id}' no encontrado")
+        await self.get_by_id(pdf_id)
         await self._repository.delete(pdf_id)
